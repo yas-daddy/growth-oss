@@ -1,0 +1,1 @@
+ALTER TABLE public.review_settings ADD COLUMN email_copy_prompt text;

@@ -1,0 +1,20 @@
+-- Add additional Meta ad metrics columns to daily_meta_ad_spend
+ALTER TABLE public.daily_meta_ad_spend
+ADD COLUMN IF NOT EXISTS reach bigint DEFAULT 0,
+ADD COLUMN IF NOT EXISTS frequency numeric DEFAULT 0,
+ADD COLUMN IF NOT EXISTS ctr numeric DEFAULT 0,
+ADD COLUMN IF NOT EXISTS cpc numeric DEFAULT 0,
+ADD COLUMN IF NOT EXISTS cpm numeric DEFAULT 0,
+ADD COLUMN IF NOT EXISTS registrations integer DEFAULT 0,
+ADD COLUMN IF NOT EXISTS registrations_cost numeric DEFAULT 0,
+ADD COLUMN IF NOT EXISTS purchases integer DEFAULT 0,
+ADD COLUMN IF NOT EXISTS purchases_cost numeric DEFAULT 0,
+ADD COLUMN IF NOT EXISTS purchases_value numeric DEFAULT 0,
+ADD COLUMN IF NOT EXISTS add_to_cart integer DEFAULT 0,
+ADD COLUMN IF NOT EXISTS link_clicks integer DEFAULT 0,
+ADD COLUMN IF NOT EXISTS landing_page_views integer DEFAULT 0,
+ADD COLUMN IF NOT EXISTS video_views_25 integer DEFAULT 0,
+ADD COLUMN IF NOT EXISTS video_views_50 integer DEFAULT 0,
+ADD COLUMN IF NOT EXISTS video_views_75 integer DEFAULT 0,
+ADD COLUMN IF NOT EXISTS video_views_100 integer DEFAULT 0,
+ADD COLUMN IF NOT EXISTS video_views_3s integer DEFAULT 0;
