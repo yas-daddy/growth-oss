@@ -39,6 +39,7 @@ import CampaignPerformance from "./pages/CampaignPerformance";
 import CompetitorAds from "./pages/CompetitorAds";
 import ComplianceChecker from "./pages/ComplianceChecker";
 import ComplianceSettings from "./pages/settings/ComplianceSettings";
+import ConversionEventsSettings from "./pages/settings/ConversionEventsSettings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
