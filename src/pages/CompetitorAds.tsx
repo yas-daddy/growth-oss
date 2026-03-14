@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search, Bookmark, BookmarkCheck, ExternalLink, Loader2, Users, Clock, Globe } from 'lucide-react';
 import { useCompetitorAdSearch, useSavedCompetitorAds, CompetitorAd, SavedCompetitorAd } from '@/hooks/useCompetitorAds';
+import { ConnectProvidersAlert } from '@/components/ConnectProvidersAlert';
 import { formatDistanceToNow } from 'date-fns';
 
 function AdCard({ 
@@ -208,6 +209,7 @@ export default function CompetitorAds() {
 
   return (
     <div className="space-y-6">
+      <ConnectProvidersAlert />
       <div>
         <h1 className="text-2xl font-bold">Competitor Ad Library</h1>
         <p className="text-muted-foreground">Search the Meta Ad Library for competitor ads and save the ones you like.</p>

@@ -28,6 +28,7 @@ import { useAppleKeywordAnalysis, useAppleKeywords, KEYWORD_COLUMN_DEFINITIONS, 
 import { format } from 'date-fns';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ImpressionShareBar } from '@/components/ui/impression-share-bar';
+import { ConnectProvidersAlert } from '@/components/ConnectProvidersAlert';
 import { SignalBars } from '@/components/ui/signal-bars';
 import { ExpandableKeywordRow } from '@/components/keywords/SearchTermBreakdown';
 type SortDirection = 'asc' | 'desc' | null;
@@ -265,6 +266,7 @@ export default function KeywordAnalysis() {
       </Helmet>
 
       <div className="space-y-6">
+        <ConnectProvidersAlert />
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <p className="text-muted-foreground text-sm">

@@ -32,6 +32,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { DateRangeFilter, DateRangeOption, getDateRange, CustomDateRange } from '@/components/DateRangeFilter';
+import { ConnectProvidersAlert } from '@/components/ConnectProvidersAlert';
 import {
   useCampaignAnalysis,
   CAMPAIGN_COLUMN_DEFINITIONS,
@@ -472,6 +473,7 @@ export default function CampaignPerformance() {
       </Helmet>
 
       <div className="space-y-6">
+        <ConnectProvidersAlert />
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <p className="text-muted-foreground text-sm">
             Campaign performance across all channels

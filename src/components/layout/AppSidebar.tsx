@@ -89,7 +89,7 @@ const experimentalNavItems = [
 ];
 
 const systemNavItems = [
-  { title: 'Settings', url: '/settings', icon: Settings, adminOnly: true },
+  { title: 'Settings', url: '/settings', icon: Settings },
 ];
 
 export function AppSidebar() {
@@ -144,10 +144,7 @@ export function AppSidebar() {
   const visibleAutomateItems = isAffiliate ? [] : automateNavItems;
   const visibleExperimentalItems = isAffiliate ? [] : experimentalNavItems;
   
-  const visibleSystemItems = systemNavItems.filter(item => {
-    if (item.adminOnly && !isAdmin) return false;
-    return true;
-  });
+  const visibleSystemItems = isAffiliate ? [] : systemNavItems;
 
   const getRoleBadge = () => {
     switch (role) {

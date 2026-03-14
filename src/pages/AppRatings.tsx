@@ -13,6 +13,7 @@ import { PendingResponsesQueue } from '@/components/ratings/PendingResponsesQueu
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { DateRangeFilter, DateRangeOption, getDateRange, getPreviousPeriod, CustomDateRange } from '@/components/DateRangeFilter';
+import { ConnectProvidersAlert } from '@/components/ConnectProvidersAlert';
 
 
 interface ReviewForResponse {
@@ -478,6 +479,7 @@ export default function AppRatings() {
 
   return (
     <div className="space-y-6 animate-fade-in">
+      <ConnectProvidersAlert />
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Review Manager</h1>

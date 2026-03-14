@@ -28,6 +28,7 @@ import { useCreativeAnalysis, COLUMN_DEFINITIONS, ColumnDef, CreativeMetrics, CO
 import { useMolocoCreativeAnalysis, MOLOCO_COLUMN_DEFINITIONS, MolocoColumnDef, MolocoCreativeMetrics, MOLOCO_COST_METRICS } from '@/hooks/useMolocoCreativeAnalysis';
 import { useMetaAdsSyncStatus } from '@/hooks/useMetaAds';
 import { useMolocoCreativesSyncStatus } from '@/hooks/useMolocoCreatives';
+import { ConnectProvidersAlert } from '@/components/ConnectProvidersAlert';
 import { useUserPreference } from '@/hooks/useUserPreferences';
 import { useMetaAccountId } from '@/hooks/useMetaAccountId';
 
@@ -344,6 +345,7 @@ export default function CreativeAnalysis() {
       </Helmet>
 
       <div className="space-y-6">
+        <ConnectProvidersAlert />
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <p className="text-muted-foreground text-sm">

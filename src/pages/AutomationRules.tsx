@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Zap } from "lucide-react";
+import { ConnectProvidersAlert } from '@/components/ConnectProvidersAlert';
 import { RulesList } from "@/components/automation/RulesList";
 import { MetaRulesList } from "@/components/automation/MetaRulesList";
 import { RuleEditorDialog } from "@/components/automation/RuleEditorDialog";
@@ -49,6 +50,7 @@ export default function AutomationRules() {
       </Helmet>
 
       <div className="space-y-6">
+        <ConnectProvidersAlert />
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
