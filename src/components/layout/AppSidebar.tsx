@@ -144,10 +144,7 @@ export function AppSidebar() {
   const visibleAutomateItems = isAffiliate ? [] : automateNavItems;
   const visibleExperimentalItems = isAffiliate ? [] : experimentalNavItems;
   
-  const visibleSystemItems = systemNavItems.filter(item => {
-    if (item.adminOnly && !isAdmin) return false;
-    return true;
-  });
+  const visibleSystemItems = isAffiliate ? [] : systemNavItems;
 
   const getRoleBadge = () => {
     switch (role) {

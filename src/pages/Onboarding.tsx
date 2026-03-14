@@ -74,6 +74,11 @@ export default function Onboarding() {
 
       if (memberError) throw memberError;
 
+      // Also assign admin role in user_roles so RLS policies work
+      await supabase
+        .from('user_roles')
+        .upsert({ user_id: user!.id, role: 'admin' }, { onConflict: 'user_id,role' });
+
       setCreatedOrgId(org.id);
       setStep(1);
       toast.success('Organization created!');
