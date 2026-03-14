@@ -58,7 +58,8 @@ export default function Onboarding() {
 
     setIsSubmitting(true);
     try {
-      const slug = orgName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      const baseSlug = orgName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      const slug = `${baseSlug}-${Math.random().toString(36).slice(2, 7)}`;
 
       const { data: org, error: orgError } = await supabase
         .from('organizations')
