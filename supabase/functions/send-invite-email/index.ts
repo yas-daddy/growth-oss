@@ -54,7 +54,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log(`Sending invite email to ${email} for role ${role}`);
 
     const appUrl = req.headers.get("origin") || "https://app.example.com";
-    const signupUrl = `${appUrl}/auth`;
+    const signupUrl = `${appUrl}/auth?invite=true&email=${encodeURIComponent(email)}`;
 
     const roleDescription = role === "affiliate" && affiliateName
       ? `${role} partner for ${affiliateName}`
@@ -78,7 +78,7 @@ const handler = async (req: Request): Promise<Response> => {
         <body>
           <div class="container">
             <h1>You're Invited!</h1>
-            <p>${inviterName ? `${inviterName} has` : "You've been"} invited you to join Stakemate as a <strong>${roleDescription}</strong>.</p>
+            <p>${inviterName ? `${inviterName} has` : "You've been"} invited you to join GrowthOS as a <strong>${roleDescription}</strong>.</p>
             
             <div class="highlight">
               <p>Sign up with this email address (<strong>${email}</strong>) to accept the invitation and get started.</p>
@@ -103,9 +103,9 @@ const handler = async (req: Request): Promise<Response> => {
         "Authorization": `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "Stakemate <onboarding@resend.dev>",
+        from: "GrowthOS <onboarding@resend.dev>",
         to: [email],
-        subject: "You've been invited to Stakemate",
+        subject: "You've been invited to GrowthOS",
         html: emailHtml,
       }),
     });
