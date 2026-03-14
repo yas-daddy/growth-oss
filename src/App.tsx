@@ -8,6 +8,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { OrganizationProvider } from "@/hooks/useOrganization";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import LandingPage from "./pages/LandingPage";
+import Docs from "./pages/Docs";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
