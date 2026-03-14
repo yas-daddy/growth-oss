@@ -125,6 +125,7 @@ function getAllAffiliates(metrics: WeeklyMetric[]): { id: string; name: string }
 export default function WeeklyTracker() {
   const { data: allMetrics = [], isLoading } = useWeeklyMetrics();
   const calculateMutation = useCalculateWeeklyMetrics();
+  const { metrics: trackerMetrics } = useResolvedTrackerMetrics();
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['overview', 'charts']));
   const [weekRange, setWeekRange] = useState<WeekRange>('3w');
   
