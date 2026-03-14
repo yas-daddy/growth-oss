@@ -2,6 +2,8 @@ import { useState, useMemo } from 'react';
 import { format, subDays } from 'date-fns';
 import { RefreshCw, Users, Target } from 'lucide-react';
 import { useMetaDemographics } from '@/hooks/useMetaDemographics';
+import { useProviderConnections } from '@/hooks/useProviderConnections';
+import { ConnectProvidersAlert } from '@/components/ConnectProvidersAlert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -40,14 +42,17 @@ export default function AudienceAnalysis() {
   const [customRange, setCustomRange] = useState<CustomDateRange>({ from: undefined, to: undefined });
   const [selectedCampaign, setSelectedCampaign] = useState<string>('all');
 
+  const { data: connections } = useProviderConnections();
+  const isMetaConnected = connections?.some(c => c.provider === 'meta_ads' && c.status === 'connected');
+
   const dateRange = getDateRange(dateRangeOption, customRange);
   const startDate = dateRange.startDate ? format(dateRange.startDate, 'yyyy-MM-dd') : undefined;
   const endDate = format(dateRange.endDate, 'yyyy-MM-dd');
 
-  const { data, isLoading, refetch, isFetching } = useMetaDemographics(
-    startDate,
-    endDate,
-    selectedCampaign !== 'all' ? selectedCampaign : undefined
+  const { data, isLoading, isError, error, refetch, isFetching } = useMetaDemographics(
+    isMetaConnected ? startDate : undefined,
+    isMetaConnected ? endDate : undefined,
+    isMetaConnected && selectedCampaign !== 'all' ? selectedCampaign : undefined
   );
 
   // Calculate KPIs
@@ -106,6 +111,16 @@ export default function AudienceAnalysis() {
 
   return (
     <div className="space-y-6">
+      <ConnectProvidersAlert
+        requiredProvider="meta_ads"
+        message="Connect your Meta Ads account to view audience demographics and insights."
+      />
+
+      {isError && isMetaConnected && (
+        <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
+          Failed to load audience data. Please check your Meta Ads connection or try again later.
+        </div>
+      )}
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>

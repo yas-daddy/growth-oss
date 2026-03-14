@@ -67,7 +67,8 @@ export function useMetaDemographics(startDate?: string, endDate?: string, campai
       if (error) throw error;
       return data;
     },
-    enabled: !!user,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    enabled: !!user && !!startDate && !!endDate,
+    staleTime: 5 * 60 * 1000,
+    retry: 1,
   });
 }
