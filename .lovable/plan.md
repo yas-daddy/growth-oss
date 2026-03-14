@@ -73,4 +73,11 @@ Completed:
 - Remaining non-sync Meta/Moloco functions (meta-create-ad, meta-pause-ad, meta-list-media, etc.) still use env fallback but are resolved via the same shared helpers pattern; to be updated incrementally
 - `updateLastSyncedAt` and `markProviderError` helpers maintain provider connection status after syncs
 
-### Phase 9: Auth + Signup Flow Polish
+### Phase 9: Auth + Signup Flow Polish ✅ DONE
+- Reworked Auth.tsx: sign-in is default mode; sign-up only available via "Have an invitation?" link (invite-only system)
+- Added invitation deep-link support: `/auth?invite=true&email=...` pre-fills email and opens signup mode
+- Added forgot password flow with `resetPasswordForEmail` redirecting to `/reset-password`
+- Created ResetPassword.tsx page: handles PASSWORD_RECOVERY event, password update with confirmation
+- Graceful error handling for "Signup not allowed" trigger rejection (shows "Invitation Required" message)
+- Updated send-invite-email edge function: signup URL now includes `?invite=true&email=` params; rebranded from Stakemate to GrowthOS
+- Added `/reset-password` route to App.tsx
