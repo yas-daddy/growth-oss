@@ -1,83 +1,55 @@
 
-# Revised Plan: Multi-Tenant B2B SaaS Revamp
 
-## Phase 8: Cleanup ✅ DONE
+# Documentation / Feature Guide Pages
 
-Completed:
-- Deleted pages: FootballAds, PushNotifications, EmailCampaigns, EmailCampaignDetail, BrandVisibility, BrandScoreSettings, PushSettings, RatingWeightsSettings
-- Deleted components: football-ads/*, email/*
-- Deleted hooks: useFootballFixtures, useFootballTeams, useFootballTeamScores, useGeneratedAds, usePushNotifications, useEmailCampaigns, useBrandScore, useBrandScoreHistory, useBrandScoreExplanations, useNPSMetrics, useBettingUsers, useChannelWeights, useFunnelData, useUserIdentityMap, useReferralSignups, useAdTemplates
-- Deleted edge functions: generate-football-ad, fetch-football-fixtures, fetch-betting-odds, schedule-match-push, cancel-match-push, generate-push-copy, schedule-email-broadcast, cancel-email-broadcast, generate-email-copy, calculate-brand-scores, calculate-nps-metrics, populate-funnel-metrics, populate-revenue-metrics, populate-user-ftd-dates
-- Dropped tables: football_fixtures, football_teams, football_team_scores, generated_football_ads, push_notification_schedules, email_campaign_schedules, email_campaign_settings, weekly_brand_scores, daily_nps_metrics, daily_revenue_metrics, daily_funnel_metrics, user_ftd_dates, user_identity_map, range_metrics_cache, channel_weights, brand_score_explanations
-- Dropped 30+ betting-specific DB functions
-- Updated App.tsx routes, AppSidebar nav, Settings page, usePageVisitTracker, useSyncFunctionLogs
-- Removed Stakemate logo/branding, removed Beta badge
-- Cast remaining RPC calls to `any` for type safety until generic replacements are built
+## Overview
+Create a public-facing documentation section accessible from the landing page that explains every GrowthOS feature, how to set it up, and how to troubleshoot common issues. This will be a new `/docs` route with a sidebar navigation and individual feature articles.
 
-## Remaining Phases
+## Architecture
 
-### Phase 1: Multi-Tenant Data Model ✅ DONE
-- Created tables: organizations, organization_members, provider_connections, conversion_events, tracker_metric_config
-- Created enums: org_role, provider_type, auth_method, connection_status
-- Created security definer functions: is_org_member, is_org_admin, get_user_org_ids
-- RLS policies scoped by org membership on all new tables
-- Added onboarding_completed to profiles
-- Note: org_id on existing data tables deferred to Phase 6 (when report functions are reworked)
+- **New route**: `/docs` and `/docs/:slug` — public pages (no auth required)
+- **New page**: `src/pages/Docs.tsx` — documentation hub with sidebar navigation and content rendering
+- **Navigation**: Add "Docs" link to the landing page nav bar and footer
+- **Content**: All documentation defined as structured data within the component (no CMS needed)
 
-### Phase 2: Organization Context + Onboarding ✅ DONE
-- Created useOrganization React context (resolves user's org from organization_members)
-- Built 3-step onboarding flow: Create Org → Select Providers → Define Conversion Events
-- Updated Index.tsx to redirect to /onboarding if not completed
-- Wrapped App with OrganizationProvider
-- Added /onboarding route to App.tsx
+## Documentation Sections
 
-### Phase 3: Provider Connections Settings Page ✅ DONE
-- Created useProviderConnections hook (CRUD for provider_connections table)
-- Rewrote ConnectionsSettings as "Partners" page with per-provider connect/disconnect dialogs
-- 9 providers with field definitions, instructions, and docs links
-- Settings hub updated to show "Partners" instead of "API Connections"
+Each section will cover: what it does, how to use it, setup requirements, and troubleshooting.
 
-### Phase 4: Conversion Events Settings ✅ DONE
-- Created useConversionEvents hook (CRUD with primary event management)
-- Built ConversionEventsSettings page with create/edit/delete/set-primary
-- Added route and Settings hub entry
+1. **Getting Started** — Creating an organisation, inviting team members, onboarding flow
+2. **Connecting Partners** — How to connect Meta Ads, Apple Search Ads, Moloco, AppsFlyer, Mixpanel, Google Play, App Store, Trustpilot, Google Search Console; where to find API keys; troubleshooting connection errors
+3. **Dashboards & KPIs** — Configurable dashboards, creating/editing dashboards, KPI cards, custom widgets
+4. **Weekly & Monthly Trackers** — What they track, how metrics are calculated, conversion event dependency
+5. **Projections** — How projections are calculated, EOM estimates, dependency on conversion events
+6. **Launch Ads** — Meta ad creation workflow, media library, creative uploads, campaign/adset selection, troubleshooting API errors
+7. **Campaign Performance** — Viewing campaign data across platforms, date filtering
+8. **Creative Analysis** — AI-powered creative performance insights, fatigue detection
+9. **Keyword Analysis** — Apple Search Ads keyword performance, AI recommendations, bid management
+10. **Audience Analysis** — Meta demographic breakdowns, setup requirements
+11. **Automation Rules** — Apple bid rules and Meta rules, creating/editing rules, execution history
+12. **Competitor Ads** — Meta Ad Library search, setup
+13. **App Ratings & Reviews** — Review monitoring across App Store, Google Play, Trustpilot; AI response suggestions; auto-response rules
+14. **Compliance Checker** — Setting up compliance rules, running checks on creatives
+15. **Conversion Events** — Defining primary/secondary events, how they affect CPA and tracker calculations
+16. **CPA Targets** — Setting thresholds for the CPA thermometer
+17. **AI Training** — Customising AI prompts for review responses and insights
+18. **Users & Permissions** — Roles (admin, user, affiliate), inviting users, org-level access
+19. **Affiliate Management** — Adding affiliates, generating tracking links, revenue tracking
 
-### Phase 5: Rework Weekly/Monthly Tracker ✅ DONE
-- Created shared `src/lib/trackerMetricDefinitions.ts` with data-driven metric definitions (key, label, section, format, getValue, invertColors)
-- Created `src/hooks/useTrackerMetricConfig.tsx` hook to fetch org-specific `tracker_metric_config` rows, with fallback to defaults
-- Refactored WeeklyTracker and MonthlyTracker to render table rows dynamically from metric definitions
-- CSV export also driven by the same metric definitions
-- Orgs can customize visible metrics and labels via `tracker_metric_config` table
+## Implementation Details
 
-### Phase 6: Rework Dashboard Report Functions ✅ DONE
-- Added org_id (FK to organizations) to report_definitions and dashboard_configs
-- Added unique constraints: (org_id, slug) and (org_id, dashboard_slug)
-- Replaced admin-only RLS with org-scoped policies (is_org_admin for writes, is_org_member for reads)
-- Created generic conversion-event-aware RPC functions:
-  - get_report_conversions(p_start_date, p_end_date, p_event_name)
-  - get_report_blended_cpa_generic(p_start_date, p_end_date, p_event_name)
-  - get_report_cpa_excl_affiliates_generic(p_start_date, p_end_date, p_event_name)
-  - get_report_conversions_by_channel(p_start_date, p_end_date, p_event_name)
-  - get_report_cpa_by_channel_generic(p_start_date, p_end_date, p_event_name)
-- Updated useDashboardConfig to filter by org_id, pass org_id on create
-- Updated useReportDefinitions to filter by org_id
-- Updated useReport to pass eventName from config to generic RPC functions
-- ReportConfig now supports eventName override for conversion-event-aware functions
+- Single `Docs.tsx` page component with slug-based content routing
+- Sidebar listing all doc sections with active state highlighting
+- Each doc article rendered from a structured array with title, content (as JSX), and optional subsections
+- Responsive layout: sidebar collapses on mobile into a dropdown/accordion
+- Consistent styling with the rest of the landing page (public, no auth)
+- Back-to-top and previous/next navigation between articles
 
-### Phase 7: Update Edge Functions for Per-Tenant Credentials ✅ DONE
-- Created `_shared/tenant-credentials.ts`: resolves credentials from `provider_connections` table with env-var fallback per provider
-- Created `_shared/org-resolver.ts`: resolves user identity and org context from request (supports both interactive and cron/service-role calls)
-- Updated core sync functions to use tenant credentials: meta-sync-campaigns, meta-sync-ads, apple-sync-campaigns, moloco-sync-campaigns, appsflyer-sync, mixpanel-sync
-- Updated meta-sync-rules, meta-get-account-id to use tenant credentials
-- Updated useMetaCampaigns hook to pass org_id to edge functions
-- Remaining non-sync Meta/Moloco functions (meta-create-ad, meta-pause-ad, meta-list-media, etc.) still use env fallback but are resolved via the same shared helpers pattern; to be updated incrementally
-- `updateLastSyncedAt` and `markProviderError` helpers maintain provider connection status after syncs
+## File Changes
 
-### Phase 9: Auth + Signup Flow Polish ✅ DONE
-- Reworked Auth.tsx: sign-in is default mode; sign-up only available via "Have an invitation?" link (invite-only system)
-- Added invitation deep-link support: `/auth?invite=true&email=...` pre-fills email and opens signup mode
-- Added forgot password flow with `resetPasswordForEmail` redirecting to `/reset-password`
-- Created ResetPassword.tsx page: handles PASSWORD_RECOVERY event, password update with confirmation
-- Graceful error handling for "Signup not allowed" trigger rejection (shows "Invitation Required" message)
-- Updated send-invite-email edge function: signup URL now includes `?invite=true&email=` params; rebranded from Stakemate to GrowthOS
-- Added `/reset-password` route to App.tsx
+| File | Change |
+|------|--------|
+| `src/pages/Docs.tsx` | **Create** — Full documentation page with all feature guides |
+| `src/App.tsx` | Add `/docs` and `/docs/:slug` routes |
+| `src/pages/LandingPage.tsx` | Add "Docs" link to nav bar and footer |
+
