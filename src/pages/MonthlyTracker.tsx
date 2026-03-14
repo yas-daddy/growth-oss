@@ -717,28 +717,15 @@ export default function MonthlyTracker() {
                 size="sm"
                 onClick={() => {
                   const headers = metrics.map(m => formatMonthLabel(m.month_start));
-                  const rows: MetricRow[] = [
-                    { label: 'Total Installs', values: metrics.map(m => m.total_installs) },
-                    { label: 'Total Signups', values: metrics.map(m => m.total_signups) },
-                    { label: 'Total FTDs', values: metrics.map(m => m.total_ftds) },
-                    { label: 'Total STDs', values: metrics.map(m => m.total_stds) },
-                    { label: 'Install → Signup %', values: metrics.map(m => (m.cvr_install_to_signup * 100).toFixed(1)) },
-                    { label: 'Signup → FTD %', values: metrics.map(m => (m.cvr_signup_to_ftd * 100).toFixed(1)) },
-                    { label: 'FTD → STD %', values: metrics.map(m => (m.cvr_ftd_to_std * 100).toFixed(1)) },
-                    { label: 'Install → STD %', values: metrics.map(m => (m.cvr_install_to_std * 100).toFixed(1)) },
-                    { label: 'Total Ad Spend', values: metrics.map(m => m.total_ad_spend.toFixed(2)) },
-                    { label: 'Total Affiliate Spend', values: metrics.map(m => m.total_affiliate_spend.toFixed(2)) },
-                    { label: 'Total Spend', values: metrics.map(m => m.total_spend.toFixed(2)) },
-                    { label: 'Blended CAC', values: metrics.map(m => m.blended_cac.toFixed(2)) },
-                    { label: 'Blended CPA', values: metrics.map(m => m.blended_cpa.toFixed(2)) },
-                    { label: 'FTD Cohort Deposits', values: metrics.map(m => m.ftd_cohort_deposits.toFixed(2)) },
-                    { label: 'Avg Deposit / FTD', values: metrics.map(m => m.avg_deposit_per_ftd.toFixed(2)) },
-                    { label: 'Ad Spend / £1k Deposit', values: metrics.map(m => m.ad_spend_per_1k_deposit.toFixed(2)) },
-                    { label: 'Net Deposits New Users', values: metrics.map(m => m.net_deposits_new_users.toFixed(2)) },
-                    { label: 'New Users Net Deposits', values: metrics.map(m => m.new_users_net_deposits.toFixed(2)) },
-                    { label: 'ROAS', values: metrics.map(m => m.roas.toFixed(2)) },
-                    { label: 'Avg Rating', values: metrics.map(m => m.avg_rating.toFixed(2)) },
-                  ];
+                  const rows: MetricRow[] = trackerMetrics.map(def => ({
+                    label: def.label,
+                    values: metrics.map(m => {
+                      const v = def.getValue(m);
+                      return def.format === 'percent' ? (v * 100).toFixed(1) : 
+                             def.format === 'currency' || def.format === 'currency_decimal' ? v.toFixed(2) :
+                             def.format === 'multiplier' ? v.toFixed(2) : v;
+                    }),
+                  }));
                   const csv = generateCsv(headers, rows);
                   downloadCsv(csv, `monthly-metrics-${new Date().toISOString().split('T')[0]}`);
                 }}
