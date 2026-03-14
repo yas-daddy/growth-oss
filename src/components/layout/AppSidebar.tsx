@@ -160,6 +160,7 @@ export function AppSidebar() {
   const visibleSystemItems = isAffiliate ? [] : systemNavItems;
 
   const getRoleBadge = () => {
+    if (isSuperAdmin) return <Badge className="bg-destructive/10 text-destructive border-destructive/30 text-[10px]">Super Admin</Badge>;
     switch (role) {
       case 'admin':
         return <Badge className="bg-primary/10 text-primary border-primary/30 text-[10px]">Admin</Badge>;
