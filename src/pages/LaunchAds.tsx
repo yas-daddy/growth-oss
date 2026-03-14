@@ -973,9 +973,16 @@ export default function LaunchAds() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {campaignsError && (
-                  <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
-                    {campaignsError instanceof Error ? campaignsError.message : 'Failed to load campaigns'}
-                  </div>
+                  <Alert variant="destructive" className="py-3">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription className="text-sm">
+                      {campaignsError instanceof Error && campaignsError.message.includes('credentials')
+                        ? 'Meta Ads API is not connected. Go to Settings → Partners to add your Meta Ads credentials.'
+                        : campaignsError instanceof Error
+                          ? campaignsError.message
+                          : 'Failed to load campaigns. Please check your Meta Ads connection in Settings → Partners.'}
+                    </AlertDescription>
+                  </Alert>
                 )}
 
                 {hasExistingPosts && (
