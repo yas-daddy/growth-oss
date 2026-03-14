@@ -3224,6 +3224,7 @@ export type Database = {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
       }
+      is_super_admin: { Args: { _user_id: string }; Returns: boolean }
       populate_daily_funnel_metrics: {
         Args: { end_dt?: string; start_dt?: string }
         Returns: Json
