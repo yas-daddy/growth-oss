@@ -171,16 +171,13 @@ export function AppSidebar() {
       <Sidebar collapsible="offcanvas" className="border-r border-sidebar-border">
         <SidebarHeader className="p-4">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg overflow-hidden flex-shrink-0">
-              <img src={stakemateLogo} alt="Stakemate" className="w-full h-full object-cover" />
+            <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
+              <span className="text-primary-foreground font-bold text-sm">G</span>
             </div>
             {!collapsed && (
               <div className="flex flex-col">
                 <div className="flex items-center gap-2">
                   <span className="font-semibold text-sm text-sidebar-foreground">GrowthOS</span>
-                  <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 border-primary/40 text-primary">
-                    Beta
-                  </Badge>
                 </div>
                 <span className="text-xs text-muted-foreground">Marketing Command Centre</span>
               </div>
