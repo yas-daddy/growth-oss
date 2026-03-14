@@ -165,9 +165,7 @@ export function AppSidebar() {
       <Sidebar collapsible="offcanvas" className="border-r border-sidebar-border">
         <SidebarHeader className="p-4">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
-              <span className="text-primary-foreground font-bold text-sm">G</span>
-            </div>
+            <img src={gosLogo} alt="GrowthOS" className="w-9 h-9 rounded-lg flex-shrink-0" />
             {!collapsed && (
               <div className="flex flex-col">
                 <div className="flex items-center gap-2">

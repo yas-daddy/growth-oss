@@ -94,7 +94,10 @@ export default function LandingPage() {
       {/* Nav */}
       <nav className="fixed top-0 inset-x-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-lg">
         <div className="mx-auto max-w-6xl flex items-center justify-between px-6 h-16">
-          <span className="text-xl font-bold gradient-text">GrowthOS</span>
+          <Link to="/" className="flex items-center gap-2">
+            <img src={gosLogo} alt="GrowthOS" className="h-8 w-8 rounded-lg" />
+            <span className="text-xl font-bold gradient-text">GrowthOS</span>
+          </Link>
           <div className="flex items-center gap-3">
             {user ? (
               <Button asChild size="sm">

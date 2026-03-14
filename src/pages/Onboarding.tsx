@@ -164,9 +164,7 @@ export default function Onboarding() {
 
       {/* Logo */}
       <div className="mb-8 flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-glow">
-          <BarChart3 className="h-5 w-5 text-primary-foreground" />
-        </div>
+        <img src={gosLogo} alt="GrowthOS" className="w-10 h-10 rounded-xl shadow-glow" />
         <span className="text-xl font-bold text-foreground">GrowthOS</span>
       </div>
 
