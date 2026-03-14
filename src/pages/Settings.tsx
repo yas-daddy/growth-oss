@@ -169,8 +169,13 @@ export default function Settings() {
           title="CPA Targets"
           description="CPA thermometer thresholds"
         />
-
-
+        <SettingsRow
+          to="/settings/conversion-events"
+          icon={<Target className="h-4 w-4 text-white" />}
+          iconBg="bg-orange-500"
+          title="Conversion Events"
+          description="Define events for CPA tracking"
+        />
       </SettingsSection>
 
       {/* Access */}
