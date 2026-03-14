@@ -1,8 +1,8 @@
 import { useMemo, useCallback, useRef } from 'react';
 import { useUserPreference } from './useUserPreferences';
 import {
-  LayoutDashboard, Star, Calendar, CalendarDays, BarChart3, Rocket, Film, BarChart2,
-  Search, PieChart, Activity, Lightbulb, Zap, Eye, Trophy, Bell, TrendingUp
+  Star, Calendar, CalendarDays, BarChart3, Rocket, Film, BarChart2,
+  Search, PieChart, Activity, Lightbulb, Zap
 } from 'lucide-react';
 import { LucideIcon } from 'lucide-react';
 
