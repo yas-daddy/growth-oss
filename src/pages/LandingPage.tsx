@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import gosLogo from '@/assets/gos-logo.png';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
