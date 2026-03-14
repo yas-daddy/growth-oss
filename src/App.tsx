@@ -109,6 +109,9 @@ const App = () => (
                 <Route path="/settings/affiliates" element={<ProtectedRoute><AffiliateSettings /></ProtectedRoute>} />
                 <Route path="/settings/affiliates/:id" element={<ProtectedRoute><AffiliateDetail /></ProtectedRoute>} />
                 <Route path="/settings/users" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
+                <Route path="/settings/platform-management" element={<ProtectedRoute><PlatformManagement /></ProtectedRoute>} />
+                <Route path="/settings/global-api-keys" element={<ProtectedRoute><GlobalAPIKeys /></ProtectedRoute>} />
+                <Route path="/settings/organizations" element={<ProtectedRoute><OrganizationsSettings /></ProtectedRoute>} />
                 
                 <Route path="*" element={<NotFound />} />
               </Routes>

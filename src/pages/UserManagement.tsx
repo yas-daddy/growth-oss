@@ -22,7 +22,8 @@ import { formatDistanceToNow } from 'date-fns';
 export default function UserManagement() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { isAdmin, isLoading: roleLoading } = useUserRole();
+  const { isAdmin, isSuperAdmin, isLoading: roleLoading } = useUserRole();
+  const canAccess = isAdmin || isSuperAdmin;
   const { data: users = [], isLoading: usersLoading } = useAllUsers();
   const { data: invitations = [], isLoading: invitationsLoading } = useUserInvitations();
   const { data: affiliates = [] } = useAffiliates();
