@@ -1,5 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { startSyncLog, completeSyncLog } from "../_shared/sync-logger.ts";
+import { getTenantCredentials, updateLastSyncedAt } from "../_shared/tenant-credentials.ts";
+import { resolveOrgContext } from "../_shared/org-resolver.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -9,9 +11,7 @@ const corsHeaders = {
 const MOLOCO_AUTH_URL = 'https://api.moloco.cloud/cm/v1/auth/tokens';
 const MOLOCO_API_URL = 'https://api.moloco.cloud/cm/v1';
 
-async function getAccessToken(): Promise<string> {
-  const apiKey = Deno.env.get('MOLOCO_API_KEY')!;
-  
+async function getMolocoAccessToken(apiKey: string): Promise<string> {
   console.log('Getting Moloco access token...');
   
   const response = await fetch(MOLOCO_AUTH_URL, {
@@ -241,67 +241,30 @@ Deno.serve(async (req) => {
   const syncLog = await startSyncLog('moloco-sync-campaigns');
   
   try {
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      await completeSyncLog(syncLog?.id || null, false, 'Missing authorization header');
+    const body = await req.json().catch(() => ({}));
+    const { userId, orgId } = await resolveOrgContext(req, body);
+
+    // Resolve credentials from tenant or env fallback
+    const { credentials: creds } = await getTenantCredentials('moloco', orgId);
+    const adAccountId = creds.ad_account_id;
+    const apiKey = creds.api_key;
+
+    if (!apiKey || !adAccountId) {
+      await completeSyncLog(syncLog?.id || null, false, 'Moloco credentials not configured');
       return new Response(
-        JSON.stringify({ error: 'Missing authorization header' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'Moloco credentials not configured' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const adAccountId = Deno.env.get('MOLOCO_AD_ACCOUNT_ID')!;
-
     const supabaseService = createClient(supabaseUrl, supabaseServiceKey);
-    
-    // Try to get user from auth header, or fall back to admin user for service role calls
-    let userId: string;
-    const supabaseAnon = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY')!, {
-      global: { headers: { Authorization: authHeader } },
-    });
 
-    const { data: { user } } = await supabaseAnon.auth.getUser();
-    if (user) {
-      // Verify user has admin role
-      const { data: userRole } = await supabaseService
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id)
-        .eq('role', 'admin')
-        .maybeSingle();
-
-      if (!userRole) {
-        return new Response(
-          JSON.stringify({ error: 'Admin access required to sync data' }),
-          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      userId = user.id;
-    } else {
-      // Service role call - get first admin user
-      const { data: adminRole } = await supabaseService
-        .from('user_roles')
-        .select('user_id')
-        .eq('role', 'admin')
-        .limit(1)
-        .maybeSingle();
-      
-      if (!adminRole) {
-        return new Response(
-          JSON.stringify({ error: 'No admin user found for service role sync' }),
-          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      userId = adminRole.user_id;
-      console.log(`Service role sync using admin user: ${userId}`);
-    }
-
-    console.log(`Syncing Moloco campaigns and creatives for user: ${userId}`);
+    console.log(`Syncing Moloco campaigns and creatives for user: ${userId}, org: ${orgId}`);
     console.log(`Using ad account ID: ${adAccountId}`);
 
-    const accessToken = await getAccessToken();
+    const accessToken = await getMolocoAccessToken(apiKey);
     
     // Fetch campaign details with budgets
     const campaignBudgets = await fetchCampaignDetails(accessToken, adAccountId);
@@ -594,7 +557,7 @@ Deno.serve(async (req) => {
       syncedAt: new Date().toISOString(),
     };
 
-    console.log('Sync completed:', result);
+    await updateLastSyncedAt(orgId, 'moloco');
     await completeSyncLog(syncLog?.id || null, true);
 
     return new Response(

@@ -2,6 +2,8 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { startSyncLog, completeSyncLog } from "../_shared/sync-logger.ts";
+import { getTenantCredentials, updateLastSyncedAt } from "../_shared/tenant-credentials.ts";
+import { resolveOrgContext } from "../_shared/org-resolver.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -16,76 +18,29 @@ serve(async (req) => {
   const syncLog = await startSyncLog('meta-sync-ads');
 
   try {
-    const metaAccessToken = Deno.env.get('META_ACCESS_TOKEN');
-    let metaAdAccountId = Deno.env.get('META_AD_ACCOUNT_ID');
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const body = await req.json().catch(() => ({}));
+    const { userId, orgId } = await resolveOrgContext(req, body);
+
+    const { credentials } = await getTenantCredentials('meta_ads', orgId);
+    let metaAccessToken = credentials.access_token;
+    let metaAdAccountId = credentials.ad_account_id;
 
     if (metaAdAccountId && !metaAdAccountId.startsWith('act_')) {
       metaAdAccountId = `act_${metaAdAccountId}`;
     }
 
     if (!metaAccessToken || !metaAdAccountId) {
-      console.error('Missing Meta credentials');
       return new Response(
         JSON.stringify({ error: 'Meta credentials not configured' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      return new Response(
-        JSON.stringify({ error: 'Authorization required' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
-    
-    // Try to get user from auth header, or fall back to admin user for service role calls
-    let userId: string;
-    const supabaseAuth = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY')!, {
-      global: { headers: { Authorization: authHeader } }
-    });
-    
-    const { data: { user } } = await supabaseAuth.auth.getUser();
-    if (user) {
-      // Verify user has admin role
-      const { data: userRole } = await supabaseAdmin
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id)
-        .eq('role', 'admin')
-        .maybeSingle();
 
-      if (!userRole) {
-        return new Response(
-          JSON.stringify({ error: 'Admin access required to sync data' }),
-          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      userId = user.id;
-    } else {
-      // Service role call - get first admin user
-      const { data: adminRole } = await supabaseAdmin
-        .from('user_roles')
-        .select('user_id')
-        .eq('role', 'admin')
-        .limit(1)
-        .maybeSingle();
-      
-      if (!adminRole) {
-        return new Response(
-          JSON.stringify({ error: 'No admin user found for service role sync' }),
-          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      userId = adminRole.user_id;
-      console.log(`Service role sync using admin user: ${userId}`);
-    }
-
-    console.log(`Syncing Meta ads for user: ${userId}`);
+    console.log(`Syncing Meta ads for user: ${userId}, org: ${orgId}`);
 
     // Step 1: Fetch all ads with their details and high-quality preview images
     const adsUrl = `https://graph.facebook.com/v21.0/${metaAdAccountId}/ads`;

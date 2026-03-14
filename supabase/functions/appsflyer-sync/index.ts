@@ -1,5 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { startSyncLog, completeSyncLog } from "../_shared/sync-logger.ts";
+import { getTenantCredentials, updateLastSyncedAt } from "../_shared/tenant-credentials.ts";
+import { resolveOrgContext } from "../_shared/org-resolver.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -178,65 +180,28 @@ Deno.serve(async (req) => {
   const syncLog = await startSyncLog('appsflyer-sync');
 
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const apiToken = Deno.env.get('APPSFLYER_API_TOKEN');
-    const iosAppId = Deno.env.get('APPSFLYER_IOS_APP_ID');
-    const androidAppId = Deno.env.get('APPSFLYER_ANDROID_APP_ID');
+    const body = await req.json().catch(() => ({}));
+    const { userId, orgId } = await resolveOrgContext(req, body);
+
+    // Resolve credentials from tenant or env fallback
+    const { credentials: creds } = await getTenantCredentials('appsflyer', orgId);
+    const apiToken = creds.api_token;
+    const iosAppId = creds.ios_app_id || creds.app_id;
+    const androidAppId = creds.android_app_id;
     
     if (!apiToken) {
-      throw new Error('APPSFLYER_API_TOKEN is not configured');
+      throw new Error('AppsFlyer API token not configured');
     }
     
     if (!iosAppId && !androidAppId) {
-      throw new Error('At least one of APPSFLYER_IOS_APP_ID or APPSFLYER_ANDROID_APP_ID must be configured');
+      throw new Error('At least one AppsFlyer App ID must be configured');
     }
     
-    // Get auth header
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      throw new Error('Missing authorization header');
-    }
-    
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
-    // Try to get user from auth header, or fall back to admin user for service role calls
-    let userId: string;
-    const userClient = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY')!, {
-      global: { headers: { Authorization: authHeader } }
-    });
-    
-    const { data: { user } } = await userClient.auth.getUser();
-    if (user) {
-      // Verify user has admin role
-      const { data: userRole } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id)
-        .eq('role', 'admin')
-        .maybeSingle();
-
-      if (!userRole) {
-        throw new Error('Admin access required to sync data');
-      }
-      userId = user.id;
-    } else {
-      // Service role call - get first admin user
-      const { data: adminRole } = await supabase
-        .from('user_roles')
-        .select('user_id')
-        .eq('role', 'admin')
-        .limit(1)
-        .maybeSingle();
-      
-      if (!adminRole) {
-        throw new Error('No admin user found for service role sync');
-      }
-      userId = adminRole.user_id;
-      console.log(`Service role sync using admin user: ${userId}`);
-    }
-    
-    console.log(`Starting AppsFlyer sync for user: ${userId}`);
+    console.log(`Starting AppsFlyer sync for user: ${userId}, org: ${orgId}`);
     
     // Calculate date range (last 7 days - historical data is preserved, only need recent days)
     const toDate = new Date();
@@ -672,6 +637,7 @@ Deno.serve(async (req) => {
     
     console.log('Sync complete. Totals:', totals);
     
+    await updateLastSyncedAt(orgId, 'appsflyer');
     await completeSyncLog(syncLog?.id || null, true);
     
     return new Response(JSON.stringify({

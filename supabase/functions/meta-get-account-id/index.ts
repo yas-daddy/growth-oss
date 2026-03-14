@@ -1,4 +1,6 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { getTenantCredentials } from "../_shared/tenant-credentials.ts";
+import { resolveOrgContext } from "../_shared/org-resolver.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -11,7 +13,11 @@ serve(async (req) => {
   }
 
   try {
-    const metaAdAccountId = Deno.env.get('META_AD_ACCOUNT_ID');
+    const body = await req.json().catch(() => ({}));
+    const { orgId } = await resolveOrgContext(req, body);
+
+    const { credentials } = await getTenantCredentials('meta_ads', orgId);
+    const metaAdAccountId = credentials.ad_account_id;
 
     if (!metaAdAccountId) {
       return new Response(

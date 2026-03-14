@@ -1,4 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { getTenantCredentials } from "../_shared/tenant-credentials.ts";
+import { resolveOrgContext } from "../_shared/org-resolver.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -28,12 +30,15 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Get Meta access token and ad account
-    const accessToken = Deno.env.get("META_ACCESS_TOKEN");
-    const adAccountId = Deno.env.get("META_AD_ACCOUNT_ID");
+    const body = await req.json().catch(() => ({}));
+    const { orgId } = await resolveOrgContext(req, body);
+
+    const { credentials } = await getTenantCredentials("meta_ads", orgId);
+    const accessToken = credentials.access_token;
+    let adAccountId = credentials.ad_account_id;
 
     if (!accessToken || !adAccountId) {
-      throw new Error("META_ACCESS_TOKEN or META_AD_ACCOUNT_ID not configured");
+      throw new Error("Meta credentials not configured");
     }
 
     // Fetch all rules from Meta

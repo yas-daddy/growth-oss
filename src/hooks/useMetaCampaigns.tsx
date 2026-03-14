@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useOrganization } from './useOrganization';
 
 export interface MetaCampaign {
   id: string;
@@ -34,6 +35,7 @@ export interface MetaSummary {
 export function useMetaCampaigns() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { organization } = useOrganization();
 
   const campaignsQuery = useQuery({
     queryKey: ['meta-campaigns'],
@@ -80,7 +82,9 @@ export function useMetaCampaigns() {
 
   const syncMutation = useMutation({
     mutationFn: async () => {
-      const { data, error } = await supabase.functions.invoke('meta-sync-campaigns');
+      const { data, error } = await supabase.functions.invoke('meta-sync-campaigns', {
+        body: { org_id: organization?.id },
+      });
       if (error) throw error;
       if (data.error) throw new Error(data.error);
       return data;

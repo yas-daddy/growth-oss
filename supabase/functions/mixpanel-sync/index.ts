@@ -1,7 +1,8 @@
 import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { startSyncLog, completeSyncLog } from "../_shared/sync-logger.ts";
+import { getTenantCredentials, updateLastSyncedAt } from "../_shared/tenant-credentials.ts";
+import { resolveOrgContext } from "../_shared/org-resolver.ts";
 
-// Declare EdgeRuntime for Supabase Edge Functions
 declare const EdgeRuntime: {
   waitUntil: (promise: Promise<unknown>) => void;
 };
@@ -25,7 +26,6 @@ interface MixpanelEvent {
   };
 }
 
-// Stream and process Mixpanel events - processes line by line to avoid memory issues
 async function streamMixpanelEvents(
   supabase: SupabaseClient,
   apiSecret: string,
@@ -67,7 +67,6 @@ async function streamMixpanelEvents(
     return { successCount: 0, errorCount: 0 };
   }
 
-  // Process stream line by line
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let buffer = '';
@@ -82,7 +81,6 @@ async function streamMixpanelEvents(
       const { done, value } = await reader.read();
       
       if (done) {
-        // Process remaining buffer
         if (buffer.trim()) {
           const event = processLine(buffer, seenInsertIds);
           if (event) eventBatch.push(event);
@@ -92,14 +90,13 @@ async function streamMixpanelEvents(
       
       buffer += decoder.decode(value, { stream: true });
       const lines = buffer.split('\n');
-      buffer = lines.pop() || ''; // Keep incomplete line in buffer
+      buffer = lines.pop() || '';
       
       for (const line of lines) {
         const event = processLine(line, seenInsertIds);
         if (event) {
           eventBatch.push(event);
           
-          // Upsert when batch is full
           if (eventBatch.length >= batchSize) {
             const result = await upsertBatch(supabase, eventBatch);
             successCount += result.success;
@@ -110,7 +107,6 @@ async function streamMixpanelEvents(
       }
     }
     
-    // Upsert remaining events
     if (eventBatch.length > 0) {
       const result = await upsertBatch(supabase, eventBatch);
       successCount += result.success;
@@ -134,12 +130,9 @@ function processLine(line: string, seenInsertIds: Set<string>): any | null {
     const props = event.properties;
     const insertId = props.$insert_id;
     
-    // Skip duplicates
     if (!insertId || seenInsertIds.has(insertId)) return null;
     seenInsertIds.add(insertId);
     
-    // Extract amount for deposit/withdrawal events
-    // Check deposit_amount, withdrawal_amount, and amount fields (Mixpanel uses different property names)
     let amount: number | null = null;
     if (event.event === 'deposit_success') {
       const depositAmount = (props as any).deposit_amount ?? (props as any).af_revenue ?? props.amount;
@@ -182,21 +175,18 @@ async function upsertBatch(supabase: SupabaseClient, batch: any[]): Promise<{ su
   return { success: batch.length, errors: 0 };
 }
 
-// Background sync function - supports date range or incremental sync
 async function performMixpanelSync(
   supabase: SupabaseClient,
-  projectId: string,
   apiSecret: string,
+  orgId: string,
   options: { days?: number; startDate?: string; endDate?: string; eventFilter?: string[] }
 ) {
-  // Start sync log
   const syncLog = await startSyncLog('mixpanel-sync');
   const logId = syncLog?.id ?? null;
   
   try {
-    console.log(`[Background] Starting Mixpanel sync`, options);
+    console.log(`[Background] Starting Mixpanel sync for org: ${orgId}`, options);
     
-    // Use eventFilter if provided, otherwise sync all events
     const eventNames = options.eventFilter && options.eventFilter.length > 0
       ? options.eventFilter
       : [
@@ -214,18 +204,13 @@ async function performMixpanelSync(
     let endDate: Date;
     
     if (options.startDate && options.endDate) {
-      // Specific date range requested
       startDate = new Date(options.startDate);
       endDate = new Date(options.endDate);
-      console.log(`[Background] Date range sync: ${options.startDate} to ${options.endDate}`);
     } else if (options.days) {
-      // Manual override - sync specified number of days
       startDate = new Date();
       startDate.setDate(startDate.getDate() - options.days);
       endDate = new Date();
-      console.log(`[Background] Manual sync: last ${options.days} days`);
     } else {
-      // Incremental sync - find last event date
       const { data: lastEvent } = await supabase
         .from('mixpanel_events')
         .select('event_time')
@@ -233,15 +218,11 @@ async function performMixpanelSync(
         .limit(1);
       
       if (lastEvent && lastEvent.length > 0) {
-        // Start from 2 days before last event (overlap for safety)
         startDate = new Date(lastEvent[0].event_time);
         startDate.setDate(startDate.getDate() - 2);
-        console.log(`[Background] Incremental sync from: ${startDate.toISOString().split('T')[0]}`);
       } else {
-        // No existing data - sync last 30 days
         startDate = new Date();
         startDate.setDate(startDate.getDate() - 30);
-        console.log(`[Background] First sync: last 30 days`);
       }
       endDate = new Date();
     }
@@ -249,26 +230,17 @@ async function performMixpanelSync(
     let totalSuccess = 0;
     let totalErrors = 0;
     
-    // Process 1 day at a time from startDate to endDate
     const currentDate = new Date(startDate);
     while (currentDate <= endDate) {
       const dateStr = currentDate.toISOString().split('T')[0];
       
-      console.log(`[Background] Processing day: ${dateStr}`);
-      
       try {
         const { successCount, errorCount } = await streamMixpanelEvents(
-          supabase,
-          apiSecret,
-          dateStr,
-          dateStr,
-          eventNames
+          supabase, apiSecret, dateStr, dateStr, eventNames
         );
         
         totalSuccess += successCount;
         totalErrors += errorCount;
-        console.log(`[Background] Day ${dateStr}: ${successCount} success, ${errorCount} errors`);
-        
       } catch (dayError) {
         console.error(`[Background] Error processing ${dateStr}:`, dayError);
       }
@@ -278,22 +250,16 @@ async function performMixpanelSync(
     
     console.log(`[Background] Mixpanel sync completed: ${totalSuccess} total, ${totalErrors} errors`);
     
-    // Complete sync log
+    await updateLastSyncedAt(orgId, 'mixpanel');
     await completeSyncLog(logId, true);
     
   } catch (error) {
     console.error('[Background] Mixpanel sync error:', error);
-    if (error instanceof Error) {
-      console.error('[Background] Error details:', error.message, error.stack);
-    }
-    
-    // Complete sync log with error
     const errorMessage = error instanceof Error ? error.message : String(error);
     await completeSyncLog(logId, false, errorMessage);
   }
 }
 
-// Handle shutdown
 addEventListener('beforeunload', (ev) => {
   console.log('[Shutdown] Function shutting down:', (ev as any).detail?.reason);
 });
@@ -304,61 +270,24 @@ Deno.serve(async (req) => {
   }
   
   try {
+    const body = await req.json().catch(() => ({}));
+    const { userId, orgId } = await resolveOrgContext(req, body);
+
+    // Resolve credentials from tenant or env fallback
+    const { credentials: creds } = await getTenantCredentials('mixpanel', orgId);
+    const projectId = creds.project_id;
+    const apiSecret = creds.api_secret;
+
+    if (!projectId || !apiSecret) {
+      throw new Error('Mixpanel credentials not configured');
+    }
+
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const projectId = Deno.env.get('MIXPANEL_PROJECT_ID');
-    const apiSecret = Deno.env.get('MIXPANEL_API_SECRET');
-    
-    if (!projectId || !apiSecret) {
-      throw new Error('MIXPANEL_PROJECT_ID and MIXPANEL_API_SECRET must be configured');
-    }
-    
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      throw new Error('Missing authorization header');
-    }
-    
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
-    // Try to get user from auth header, or fall back to admin user for service role calls
-    let userId: string;
-    const userClient = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY')!, {
-      global: { headers: { Authorization: authHeader } }
-    });
+    console.log(`Received sync request for user: ${userId}, org: ${orgId}`);
     
-    const { data: { user } } = await userClient.auth.getUser();
-    if (user) {
-      // Verify user has admin role
-      const { data: userRole } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id)
-        .eq('role', 'admin')
-        .maybeSingle();
-
-      if (!userRole) {
-        throw new Error('Admin access required to sync data');
-      }
-      userId = user.id;
-    } else {
-      // Service role call - get first admin user
-      const { data: adminRole } = await supabase
-        .from('user_roles')
-        .select('user_id')
-        .eq('role', 'admin')
-        .limit(1)
-        .maybeSingle();
-      
-      if (!adminRole) {
-        throw new Error('No admin user found for service role sync');
-      }
-      userId = adminRole.user_id;
-      console.log(`Service role sync using admin user: ${userId}`);
-    }
-    
-    console.log(`Received sync request for user: ${userId}`);
-    
-    const body = await req.json().catch(() => ({}));
     const options = {
       days: body.days || undefined,
       startDate: body.startDate || undefined,
@@ -367,7 +296,7 @@ Deno.serve(async (req) => {
     };
     
     EdgeRuntime.waitUntil(
-      performMixpanelSync(supabase, projectId, apiSecret, options)
+      performMixpanelSync(supabase, apiSecret, orgId, options)
     );
     
     return new Response(JSON.stringify({
