@@ -85,15 +85,11 @@ const automateNavItems = [
   { title: 'Recommendations', url: '/recommendations', icon: Lightbulb, badge: 'ai' as const },
   { title: 'Compliance', url: '/compliance', icon: Shield, badge: 'ai' as const },
   { title: 'Review Manager', url: '/ratings', icon: Star },
-  { title: 'Push Notifications', url: '/push-notifications', icon: Bell, badge: 'new' as const },
 ];
 
 // Experimental features
 const experimentalNavItems = [
   { title: 'Competitor Ads', url: '/competitor-ads', icon: Megaphone, badge: 'beta' as const },
-  { title: 'Football Ads', url: '/football-ads', icon: Trophy, badge: 'alpha' as const },
-  { title: 'Brand Score', url: '/brand-visibility', icon: Eye, badge: 'beta' as const },
-  { title: 'Canvas Scheduler', url: '/email-campaigns', icon: Mail, badge: 'new' as const },
 ];
 
 const systemNavItems = [
