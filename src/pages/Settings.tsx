@@ -160,13 +160,8 @@ export default function Settings() {
           title="Affiliate Partners"
           description="Manage affiliate partners and links"
         />
-        <SettingsRow
-          to="/settings/brand-score"
-          icon={<TrendingUp className="h-4 w-4 text-white" />}
-          iconBg="bg-sky-500"
-          title="Brand Score"
-          description="Customize score explanations"
-        />
+
+
         <SettingsRow
           to="/settings/cpa"
           icon={<Gauge className="h-4 w-4 text-white" />}
