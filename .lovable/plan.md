@@ -42,8 +42,12 @@ Completed:
 - Built ConversionEventsSettings page with create/edit/delete/set-primary
 - Added route and Settings hub entry
 
-### Phase 5: Rework Weekly/Monthly Tracker
-- Dynamic metric selection via tracker_metric_config
+### Phase 5: Rework Weekly/Monthly Tracker ✅ DONE
+- Created shared `src/lib/trackerMetricDefinitions.ts` with data-driven metric definitions (key, label, section, format, getValue, invertColors)
+- Created `src/hooks/useTrackerMetricConfig.tsx` hook to fetch org-specific `tracker_metric_config` rows, with fallback to defaults
+- Refactored WeeklyTracker and MonthlyTracker to render table rows dynamically from metric definitions
+- CSV export also driven by the same metric definitions
+- Orgs can customize visible metrics and labels via `tracker_metric_config` table
 
 ### Phase 6: Rework Dashboard Report Functions
 - Generic conversion-event-based report functions
