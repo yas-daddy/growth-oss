@@ -19,7 +19,7 @@ import ConnectionsSettings from "./pages/settings/ConnectionsSettings";
 import SyncSettings from "./pages/settings/SyncSettings";
 import AISettings from "./pages/settings/AISettings";
 import AutoResponsesSettings from "./pages/settings/AutoResponsesSettings";
-import PushSettings from "./pages/settings/PushSettings";
+
 import CPASettings from "./pages/settings/CPASettings";
 import RatingWeightsSettings from "./pages/settings/RatingWeightsSettings";
 import SecuritySettings from "./pages/settings/SecuritySettings";
