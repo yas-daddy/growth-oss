@@ -1,12 +1,13 @@
 import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { ArrowLeft, CheckCircle2, XCircle, Plug, ExternalLink, Loader2, Unplug } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { ArrowLeft, CheckCircle2, Plug, Loader2, Unplug, ChevronDown, HelpCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useProviderConnections, useUpsertProviderConnection, useDisconnectProvider } from '@/hooks/useProviderConnections';
 import { useOrganization } from '@/hooks/useOrganization';
@@ -26,9 +27,8 @@ interface ProviderDef {
   category: string;
   method: 'oauth' | 'api_key';
   description: string;
-  docsUrl: string;
+  setupGuide: string[];
   fields: ProviderField[];
-  instructions: string;
 }
 
 const PROVIDERS: ProviderDef[] = [
@@ -38,12 +38,18 @@ const PROVIDERS: ProviderDef[] = [
     category: 'Ad Platform',
     method: 'oauth',
     description: 'Facebook & Instagram advertising. Connect via OAuth to sync campaigns, ads, and performance data.',
-    docsUrl: 'https://developers.facebook.com/docs/marketing-apis/',
     fields: [
       { key: 'access_token', label: 'Access Token', type: 'password', placeholder: 'Your long-lived access token', helpText: 'Generate from Facebook Business Settings → System Users' },
       { key: 'ad_account_id', label: 'Ad Account ID', type: 'text', placeholder: 'act_123456789' },
     ],
-    instructions: 'Go to Meta Business Suite → Settings → System Users → Generate Token with ads_read and ads_management permissions.',
+    setupGuide: [
+      'Go to business.facebook.com and open Business Settings.',
+      'In the left menu, click "Users" → "System Users". If you don\'t have one, click "Add" to create a new System User with Admin role.',
+      'Click on your System User, then click "Generate New Token".',
+      'Select your app, then check the permissions: ads_read and ads_management. Click "Generate Token".',
+      'Copy the token — this is your Access Token. Store it somewhere safe as it won\'t be shown again.',
+      'For your Ad Account ID: go to Business Settings → "Accounts" → "Ad Accounts". Your ID starts with "act_" followed by numbers.',
+    ],
   },
   {
     type: 'apple_search_ads',
@@ -51,7 +57,6 @@ const PROVIDERS: ProviderDef[] = [
     category: 'Ad Platform',
     method: 'api_key',
     description: 'App Store search advertising. Sync keyword bids, campaigns, and conversion data.',
-    docsUrl: 'https://developer.apple.com/documentation/apple_search_ads',
     fields: [
       { key: 'client_id', label: 'Client ID', type: 'text', placeholder: 'SEARCHADS.xxxx' },
       { key: 'team_id', label: 'Team ID', type: 'text', placeholder: 'Your team ID' },
@@ -59,7 +64,15 @@ const PROVIDERS: ProviderDef[] = [
       { key: 'private_key', label: 'Private Key', type: 'textarea', placeholder: '-----BEGIN EC PRIVATE KEY-----\n...' },
       { key: 'org_id_apple', label: 'Org ID', type: 'text', placeholder: 'Your Apple Search Ads Org ID' },
     ],
-    instructions: 'Go to Apple Search Ads → Settings → API → Create API certificate. Download the private key and enter the credentials below.',
+    setupGuide: [
+      'Sign in at searchads.apple.com with your Apple ID.',
+      'Click on your account name in the top-right corner, then go to "Settings".',
+      'Click the "API" tab at the top of the page.',
+      'Under "Client API Certificates", click "Create API Certificate". Choose an "Account Admin" or "Account Read Only" role.',
+      'After creating the certificate, you\'ll see your Client ID (starts with "SEARCHADS."), Team ID, and Key ID.',
+      'Click "Download" to save the private key file (.key). Open it in a text editor and copy the full contents including the BEGIN/END lines.',
+      'Your Org ID is visible in the top-right of the Apple Search Ads dashboard next to your account name.',
+    ],
   },
   {
     type: 'moloco',
@@ -67,13 +80,18 @@ const PROVIDERS: ProviderDef[] = [
     category: 'Ad Platform',
     method: 'api_key',
     description: 'Programmatic mobile advertising platform for performance marketing.',
-    docsUrl: 'https://moloco.com/docs',
     fields: [
       { key: 'api_key', label: 'API Key', type: 'password', placeholder: 'Your Moloco API key' },
       { key: 'ad_account_id', label: 'Ad Account ID', type: 'text', placeholder: 'Your Moloco ad account ID' },
       { key: 'platform_id', label: 'Platform ID', type: 'text', placeholder: 'e.g., ROULETTE' },
     ],
-    instructions: 'Contact your Moloco account manager to obtain API credentials, or find them in the Moloco dashboard under Settings.',
+    setupGuide: [
+      'Log in to your Moloco dashboard at dashboard.moloco.com.',
+      'Navigate to "Settings" in the left sidebar.',
+      'Under the "API" section, you\'ll find your API Key. Click "Show" or "Copy" to get it.',
+      'Your Ad Account ID is displayed at the top of the Settings page or in your account dropdown.',
+      'The Platform ID is your app identifier used in Moloco (e.g., "ROULETTE"). You can find it under Campaign settings or ask your Moloco account manager.',
+    ],
   },
   {
     type: 'appsflyer',
@@ -81,12 +99,16 @@ const PROVIDERS: ProviderDef[] = [
     category: 'Attribution',
     method: 'api_key',
     description: 'Mobile attribution and marketing analytics platform.',
-    docsUrl: 'https://support.appsflyer.com/hc/en-us/articles/207034486',
     fields: [
       { key: 'api_token', label: 'API Token (V2)', type: 'password', placeholder: 'Your AppsFlyer API token' },
       { key: 'app_id', label: 'App ID', type: 'text', placeholder: 'e.g., id123456789 or com.example.app' },
     ],
-    instructions: 'Go to AppsFlyer Dashboard → Settings → API Access → Copy your V2 API Token.',
+    setupGuide: [
+      'Log in to your AppsFlyer dashboard at hq1.appsflyer.com.',
+      'Click on your email/avatar in the top-right corner and select "Security Center".',
+      'Scroll down to "API Tokens" and find your V2 API Token. Click the copy icon.',
+      'Your App ID is your app\'s identifier: for iOS it starts with "id" followed by numbers (e.g., id123456789), for Android it\'s your package name (e.g., com.example.app).',
+    ],
   },
   {
     type: 'mixpanel',
@@ -94,12 +116,16 @@ const PROVIDERS: ProviderDef[] = [
     category: 'Analytics',
     method: 'api_key',
     description: 'Product analytics for tracking user engagement and retention.',
-    docsUrl: 'https://developer.mixpanel.com/docs',
     fields: [
       { key: 'project_id', label: 'Project ID', type: 'text', placeholder: 'Your Mixpanel project ID' },
       { key: 'api_secret', label: 'API Secret', type: 'password', placeholder: 'Your Mixpanel API secret' },
     ],
-    instructions: 'Go to Mixpanel → Settings → Project Settings → find your Project ID and API Secret.',
+    setupGuide: [
+      'Log in to mixpanel.com and open the project you want to connect.',
+      'Click the gear icon ⚙️ in the top-right corner to open Project Settings.',
+      'Under "Project Details", you\'ll see your Project ID (a numeric value). Copy it.',
+      'On the same page, scroll to "API Secret" and click "Show" to reveal it. Copy it.',
+    ],
   },
   {
     type: 'app_store',
@@ -107,14 +133,21 @@ const PROVIDERS: ProviderDef[] = [
     category: 'Reviews',
     method: 'api_key',
     description: 'Sync iOS app reviews and respond directly from GrowthOS.',
-    docsUrl: 'https://developer.apple.com/documentation/appstoreconnectapi',
     fields: [
       { key: 'key_id', label: 'Key ID', type: 'text', placeholder: 'Your API key ID' },
       { key: 'issuer_id', label: 'Issuer ID', type: 'text', placeholder: 'Your issuer ID' },
       { key: 'private_key', label: 'Private Key (.p8)', type: 'textarea', placeholder: '-----BEGIN PRIVATE KEY-----\n...' },
       { key: 'app_id', label: 'App ID', type: 'text', placeholder: 'e.g., 123456789' },
     ],
-    instructions: 'Go to App Store Connect → Users and Access → Integrations → App Store Connect API → Generate API Key.',
+    setupGuide: [
+      'Sign in at appstoreconnect.apple.com.',
+      'Go to "Users and Access" from the top navigation.',
+      'Click the "Integrations" tab, then select "App Store Connect API" in the sidebar.',
+      'Click the "+" button to create a new API key. Give it a name and select "Admin" or "Developer" access.',
+      'Once created, you\'ll see the Key ID in the list. Your Issuer ID is shown at the top of the page.',
+      'Click "Download API Key" to get the .p8 file. ⚠️ You can only download this once! Open it in a text editor and copy the full contents.',
+      'For your App ID: go to "Apps" in App Store Connect, click your app, and find the Apple ID in the "App Information" section.',
+    ],
   },
   {
     type: 'google_play',
@@ -122,12 +155,21 @@ const PROVIDERS: ProviderDef[] = [
     category: 'Reviews',
     method: 'api_key',
     description: 'Sync Android app reviews and respond directly from GrowthOS.',
-    docsUrl: 'https://developers.google.com/android-publisher',
     fields: [
       { key: 'service_account_json', label: 'Service Account JSON', type: 'textarea', placeholder: '{"type": "service_account", ...}', helpText: 'Paste the full JSON key file contents' },
       { key: 'package_name', label: 'Package Name', type: 'text', placeholder: 'com.example.app' },
     ],
-    instructions: 'Create a Service Account in Google Cloud Console, grant it access in Google Play Console, and download the JSON key file.',
+    setupGuide: [
+      'Go to console.cloud.google.com and select (or create) the project linked to your app.',
+      'Open the hamburger menu ☰ → "IAM & Admin" → "Service Accounts".',
+      'Click "+ Create Service Account". Give it a name like "growthOS-reviews" and click "Create and Continue".',
+      'Skip the optional role steps and click "Done".',
+      'Click on the new service account, go to the "Keys" tab, click "Add Key" → "Create new key" → choose JSON → click "Create". A file will download.',
+      'Open the downloaded JSON file in a text editor and paste the entire contents into the field below.',
+      'Now go to play.google.com/console. Open "Settings" → "API access". Find your service account and click "Grant access".',
+      'Give it "View app information and download bulk reports" + "Reply to reviews" permissions, then click "Invite user".',
+      'Your Package Name is your Android app ID (e.g., com.example.app), visible in the Play Console URL or app dashboard.',
+    ],
   },
   {
     type: 'trustpilot',
@@ -135,7 +177,6 @@ const PROVIDERS: ProviderDef[] = [
     category: 'Reviews',
     method: 'api_key',
     description: 'Sync and manage Trustpilot customer reviews.',
-    docsUrl: 'https://documentation-apidocumentation.trustpilot.com/',
     fields: [
       { key: 'api_key', label: 'API Key', type: 'password', placeholder: 'Your Trustpilot API key' },
       { key: 'api_secret', label: 'API Secret', type: 'password', placeholder: 'Your Trustpilot API secret' },
@@ -143,7 +184,13 @@ const PROVIDERS: ProviderDef[] = [
       { key: 'username', label: 'Trustpilot Username', type: 'text', placeholder: 'your@email.com' },
       { key: 'password', label: 'Trustpilot Password', type: 'password', placeholder: 'Your password' },
     ],
-    instructions: 'Go to Trustpilot Business → Integrations → API to find your API key and Business Unit ID.',
+    setupGuide: [
+      'Log in to your Trustpilot Business account at businessapp.b2b.trustpilot.com.',
+      'Go to "Integrations" in the left sidebar, then click on "API" or "Developers".',
+      'Create an application if you don\'t already have one. You\'ll receive an API Key and API Secret.',
+      'Your Business Unit ID can be found in the URL when viewing your Trustpilot business page, or under "Business Settings". It\'s a long alphanumeric string.',
+      'The username and password are your Trustpilot login credentials — the same email and password you used to sign in.',
+    ],
   },
   {
     type: 'google_search_console',
@@ -151,12 +198,20 @@ const PROVIDERS: ProviderDef[] = [
     category: 'SEO',
     method: 'api_key',
     description: 'Track search performance, impressions, and click-through rates.',
-    docsUrl: 'https://developers.google.com/webmaster-tools/v1/how-tos/authorizing',
     fields: [
       { key: 'service_account_json', label: 'Service Account JSON', type: 'textarea', placeholder: '{"type": "service_account", ...}' },
       { key: 'site_url', label: 'Site URL', type: 'text', placeholder: 'https://example.com' },
     ],
-    instructions: 'Create a Service Account in Google Cloud Console, add it as a user in Search Console, and download the JSON key.',
+    setupGuide: [
+      'Go to console.cloud.google.com and select (or create) a project.',
+      'Enable the "Google Search Console API": go to "APIs & Services" → "Library", search for "Search Console API", and click "Enable".',
+      'Create a Service Account: go to "IAM & Admin" → "Service Accounts" → "+ Create Service Account". Name it and click through the steps.',
+      'Click on the service account, go to "Keys" tab → "Add Key" → "Create new key" → JSON. A file will download.',
+      'Copy the service account email address (looks like name@project.iam.gserviceaccount.com).',
+      'Go to search.google.com/search-console. Open your property, then go to "Settings" → "Users and permissions" → "Add user".',
+      'Paste the service account email, set permission to "Full", and click "Add".',
+      'Open the downloaded JSON file in a text editor and paste the full contents into the field below.',
+    ],
   },
 ];
 
@@ -169,31 +224,29 @@ export default function ConnectionsSettings() {
   const [connectDialog, setConnectDialog] = useState<ProviderDef | null>(null);
   const [disconnectDialog, setDisconnectDialog] = useState<string | null>(null);
   const [formData, setFormData] = useState<Record<string, string>>({});
+  const [guideOpen, setGuideOpen] = useState(false);
 
   const getConnection = (providerType: string) =>
     connections?.find(c => c.provider === providerType && c.status === 'connected');
 
   const openConnectDialog = (provider: ProviderDef) => {
-    // Pre-fill if already connected
     const existing = connections?.find(c => c.provider === provider.type);
     const initialData: Record<string, string> = {};
     provider.fields.forEach(f => {
       initialData[f.key] = (existing?.credentials as any)?.[f.key] || '';
     });
     setFormData(initialData);
+    setGuideOpen(false);
     setConnectDialog(provider);
   };
 
   const handleConnect = async () => {
     if (!connectDialog) return;
-
-    // Validate required fields
     const emptyFields = connectDialog.fields.filter(f => !formData[f.key]?.trim());
     if (emptyFields.length > 0) {
       toast.error(`Please fill in: ${emptyFields.map(f => f.label).join(', ')}`);
       return;
     }
-
     try {
       await upsertConnection.mutateAsync({
         provider: connectDialog.type,
@@ -219,7 +272,6 @@ export default function ConnectionsSettings() {
     }
   };
 
-  // Group providers by category
   const categories = [...new Set(PROVIDERS.map(p => p.category))];
 
   return (
@@ -300,11 +352,6 @@ export default function ConnectionsSettings() {
                               )}
                             </>
                           )}
-                          <Button size="sm" variant="ghost" asChild>
-                            <a href={provider.docsUrl} target="_blank" rel="noopener noreferrer">
-                              <ExternalLink className="h-3 w-3" />
-                            </a>
-                          </Button>
                         </div>
                       </div>
                     </CardContent>
@@ -321,8 +368,38 @@ export default function ConnectionsSettings() {
         <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Connect {connectDialog?.label}</DialogTitle>
-            <DialogDescription>{connectDialog?.instructions}</DialogDescription>
+            <DialogDescription>Enter your credentials below to connect this service.</DialogDescription>
           </DialogHeader>
+
+          {/* Setup Guide */}
+          {connectDialog && (
+            <Collapsible open={guideOpen} onOpenChange={setGuideOpen}>
+              <CollapsibleTrigger asChild>
+                <Button variant="ghost" size="sm" className="w-full justify-between text-muted-foreground hover:text-foreground mb-1">
+                  <span className="flex items-center gap-1.5 text-xs font-medium">
+                    <HelpCircle className="h-3.5 w-3.5" />
+                    How to get these credentials
+                  </span>
+                  <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-200 ${guideOpen ? 'rotate-180' : ''}`} />
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="rounded-lg border bg-muted/50 p-4 mb-4">
+                  <ol className="space-y-2.5">
+                    {connectDialog.setupGuide.map((step, i) => (
+                      <li key={i} className="flex gap-2.5 text-xs leading-relaxed">
+                        <span className="flex-shrink-0 w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px] font-bold mt-0.5">
+                          {i + 1}
+                        </span>
+                        <span className="text-muted-foreground">{step}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+          )}
+
           <div className="space-y-4 py-2">
             {connectDialog?.fields.map(field => (
               <div key={field.key} className="space-y-1.5">
