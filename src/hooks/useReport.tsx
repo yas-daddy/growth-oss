@@ -124,9 +124,9 @@ export function useReport(slug: string, options: UseReportOptions) {
           ? { p_start_date: prevStartDate, p_end_date: prevEndDate }
           : { start_date: prevStartDate, end_date: prevEndDate };
 
-        const { data: prevData, error: prevError } = await supabase.rpc(
-          definition.data_source as KpiRpcFunction,
-          prevParams as any
+        const { data: prevData, error: prevError } = await (supabase.rpc as any)(
+          definition.data_source,
+          prevParams
         );
 
         if (!prevError && prevData && prevData.length > 0) {
