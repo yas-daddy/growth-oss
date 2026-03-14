@@ -13,7 +13,7 @@ import { PendingResponsesQueue } from '@/components/ratings/PendingResponsesQueu
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { DateRangeFilter, DateRangeOption, getDateRange, getPreviousPeriod, CustomDateRange } from '@/components/DateRangeFilter';
-import { useChannelWeights } from '@/hooks/useChannelWeights';
+
 
 interface ReviewForResponse {
   id: string;
