@@ -34,7 +34,7 @@ function campaignKey(row: CampaignMetrics): string {
 }
 
 async function fetchCampaignMetrics(startDate: string, endDate: string): Promise<CampaignMetrics[]> {
-  const { data, error } = await supabase.rpc('get_report_campaign_performance', {
+  const { data, error } = await (supabase.rpc as any)('get_report_campaign_performance', {
     start_date: startDate,
     end_date: endDate,
   });
