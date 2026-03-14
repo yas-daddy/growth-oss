@@ -103,7 +103,7 @@ const App = () => (
               <Route path="/settings/affiliates" element={<ProtectedRoute><AffiliateSettings /></ProtectedRoute>} />
               <Route path="/settings/affiliates/:id" element={<ProtectedRoute><AffiliateDetail /></ProtectedRoute>} />
               <Route path="/settings/users" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
-              <Route path="/settings/brand-score" element={<ProtectedRoute><BrandScoreSettings /></ProtectedRoute>} />
+              
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

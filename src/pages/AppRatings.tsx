@@ -99,8 +99,8 @@ export default function AppRatings() {
   const { stats: typeformStats } = useTypeformStats();
   const { data: typeformReviews } = useTypeformReviewsWithFeedback();
 
-  // Channel weights for weighted average
-  const { data: channelWeights } = useChannelWeights();
+  // Channel weights for weighted average (default equal weights)
+  const channelWeights = { app_store_weight: 1, google_play_weight: 1, trustpilot_weight: 1, typeform_weight: 1 };
 
   const handleTrustpilotSync = async () => {
     try {

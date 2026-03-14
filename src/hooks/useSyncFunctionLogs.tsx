@@ -40,7 +40,7 @@ const SYNC_FUNCTIONS = [
 
   { name: 'calculate-weekly-metrics', display: 'Weekly Metrics', category: 'Calculations' },
   { name: 'calculate-monthly-metrics', display: 'Monthly Metrics', category: 'Calculations' },
-  { name: 'populate-funnel-metrics', display: 'Funnel Metrics', category: 'Calculations' },
+  
   { name: 'auto-respond-reviews', display: 'Auto-Respond Reviews', category: 'Automation' },
 ];
 

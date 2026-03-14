@@ -61,7 +61,7 @@ export default function ConnectionsSettings() {
     { name: 'Typeform Surveys', type: 'Surveys (Webhook)', isConnected: typeformStats.totalResponses > 0, lastSynced: typeformStats.lastSynced ? new Date(typeformStats.lastSynced) : null, onSync: null, isSyncing: false },
     { name: 'Google Search Console', type: 'Brand Visibility', isConnected: (searchConsoleStats?.totalRecords ?? 0) > 0, lastSynced: searchConsoleStats?.lastSynced ? new Date(searchConsoleStats.lastSynced) : null, onSync: () => syncSearchConsole(), isSyncing: isSearchConsoleSyncing },
     { name: 'App Store Analytics', type: 'Brand Visibility', isConnected: (organicInstallsStats?.totalRecords ?? 0) > 0, lastSynced: organicInstallsStats?.lastSynced ? new Date(organicInstallsStats.lastSynced) : null, onSync: () => syncOrganicInstalls(), isSyncing: isOrganicInstallsSyncing },
-    { name: 'Football Fixtures & Odds', type: 'Sports & Odds', isConnected: isFixturesConnected, lastSynced: fixtures[0]?.updated_at ? new Date(fixtures[0].updated_at) : null, onSync: syncFixtures, isSyncing: isFixturesSyncing },
+    
   ];
 
   const handleSyncClick = (api: { name: string; onSync: () => void }) => {

@@ -22,8 +22,8 @@ const PAGE_METADATA: Record<string, PageMeta> = {
   '/creative-analysis': { title: 'Creative Analysis', icon: BarChart2 },
   '/keyword-analysis': { title: 'Keyword Analysis', icon: Search },
   '/audience-analysis': { title: 'Audience Analysis', icon: PieChart },
-  '/football-ads': { title: 'Football Ads', icon: Trophy },
-  '/brand-visibility': { title: 'Brand Score', icon: Eye },
+
+
 };
 
 // Paths we never track
