@@ -9,7 +9,8 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Building2, Plug, Target, ArrowRight, ArrowLeft, Check, Loader2, BarChart3 } from 'lucide-react';
+import { Building2, Plug, Target, ArrowRight, ArrowLeft, Check, Loader2 } from 'lucide-react';
+import gosLogo from '@/assets/gos-logo.png';
 
 const PROVIDERS = [
   { type: 'meta_ads', label: 'Meta Ads', method: 'oauth', description: 'Facebook & Instagram advertising' },
