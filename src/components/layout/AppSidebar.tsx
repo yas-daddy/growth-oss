@@ -89,7 +89,7 @@ const experimentalNavItems = [
 ];
 
 const systemNavItems = [
-  { title: 'Settings', url: '/settings', icon: Settings, adminOnly: true },
+  { title: 'Settings', url: '/settings', icon: Settings },
 ];
 
 export function AppSidebar() {
