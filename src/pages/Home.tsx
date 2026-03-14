@@ -433,9 +433,8 @@ function useMTDBlendedCPA() {
       const prevValue = Array.isArray(prevCpaResult.data) && prevCpaResult.data.length > 0 
         ? Number(prevCpaResult.data[0]?.value || 0) 
         : 0;
-      const totalFTDs = funnelResult.data?.reduce((sum, r) => sum + (r.unique_ftds || 0), 0) || 0;
 
-      return { value: currentValue, previous_value: prevValue, ftds: totalFTDs };
+      return { value: currentValue, previous_value: prevValue, ftds: 0 };
     }
   });
 }
