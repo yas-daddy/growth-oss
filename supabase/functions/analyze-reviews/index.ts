@@ -42,12 +42,21 @@ serve(async (req) => {
 
     console.log(`Analyzing ${reviews.length} negative reviews...`);
 
-    // Get organization-wide custom insights prompt
-    const { data: settings } = await supabaseClient
-      .from('review_settings')
-      .select('insights_prompt')
+    // Resolve user's org to fetch org-scoped review settings
+    const { data: membership } = await supabaseClient
+      .from('organization_members')
+      .select('org_id')
+      .eq('user_id', user.id)
       .limit(1)
       .maybeSingle();
+
+    const { data: settings } = membership?.org_id
+      ? await supabaseClient
+          .from('review_settings')
+          .select('insights_prompt')
+          .eq('org_id', membership.org_id)
+          .maybeSingle()
+      : { data: null };
 
     const defaultPrompt = `Analyze these customer reviews and provide brief insights in two sections.
 
