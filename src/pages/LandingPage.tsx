@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import gosLogo from '@/assets/gos-logo.png';
+import heroImage from '@/assets/hero-gos.png';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -141,6 +142,9 @@ export default function LandingPage() {
             <Button size="lg" variant="outline" asChild className="px-8 text-base">
               <a href="mailto:hello@growthOS.app">Book a Demo</a>
             </Button>
+          </div>
+          <div className="mt-14 mx-auto max-w-3xl">
+            <img src={heroImage} alt="GrowthOS platform" className="w-full rounded-2xl shadow-2xl" />
           </div>
         </div>
       </section>
