@@ -25,7 +25,9 @@ import {
   Zap,
   Lightbulb,
   Home,
-  ChevronRight
+  ChevronRight,
+  ChevronsUpDown,
+  Building2,
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import gosLogo from '@/assets/gos-logo.png';
@@ -33,6 +35,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 
 import { useUserRole } from '@/hooks/useUserRole';
+import { useOrganization } from '@/hooks/useOrganization';
 import { useAllDashboards } from '@/hooks/useDashboardConfig';
 import { DashboardManagerDialog, getIconComponent } from '@/components/dashboard/DashboardManagerDialog';
 
