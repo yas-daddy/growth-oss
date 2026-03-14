@@ -143,6 +143,9 @@ export default function LandingPage() {
               <a href="mailto:hello@growthOS.app">Book a Demo</a>
             </Button>
           </div>
+          <div className="mt-14 mx-auto max-w-3xl">
+            <img src={heroImage} alt="GrowthOS platform" className="w-full rounded-2xl shadow-2xl" />
+          </div>
         </div>
       </section>
 
