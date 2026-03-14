@@ -37,9 +37,10 @@ Completed:
 - 9 providers with field definitions, instructions, and docs links
 - Settings hub updated to show "Partners" instead of "API Connections"
 
-### Phase 4: Conversion Events Settings
-- Users define conversion events for CPA tracking
-- Replace hardcoded FTD references
+### Phase 4: Conversion Events Settings ✅ DONE
+- Created useConversionEvents hook (CRUD with primary event management)
+- Built ConversionEventsSettings page with create/edit/delete/set-primary
+- Added route and Settings hub entry
 
 ### Phase 5: Rework Weekly/Monthly Tracker
 - Dynamic metric selection via tracker_metric_config

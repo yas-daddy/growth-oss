@@ -39,6 +39,7 @@ import CampaignPerformance from "./pages/CampaignPerformance";
 import CompetitorAds from "./pages/CompetitorAds";
 import ComplianceChecker from "./pages/ComplianceChecker";
 import ComplianceSettings from "./pages/settings/ComplianceSettings";
+import ConversionEventsSettings from "./pages/settings/ConversionEventsSettings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -93,6 +94,7 @@ const App = () => (
                 <Route path="/settings/ai" element={<ProtectedRoute><AISettings /></ProtectedRoute>} />
                 <Route path="/settings/auto-responses" element={<ProtectedRoute><AutoResponsesSettings /></ProtectedRoute>} />
                 <Route path="/settings/cpa" element={<ProtectedRoute><CPASettings /></ProtectedRoute>} />
+                <Route path="/settings/conversion-events" element={<ProtectedRoute><ConversionEventsSettings /></ProtectedRoute>} />
                 <Route path="/settings/security" element={<ProtectedRoute><SecuritySettings /></ProtectedRoute>} />
                 <Route path="/settings/appearance" element={<ProtectedRoute><AppearanceSettings /></ProtectedRoute>} />
                 <Route path="/settings/compliance" element={<ProtectedRoute><ComplianceSettings /></ProtectedRoute>} />
