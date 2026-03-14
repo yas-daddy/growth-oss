@@ -129,6 +129,7 @@ export default function MonthlyTracker() {
   const [range, setRange] = useState<MonthlyRange>('3m');
   const { data: metrics = [], isLoading } = useMonthlyMetrics(range);
   const calculateMutation = useCalculateMonthlyMetrics();
+  const { metrics: trackerMetrics } = useResolvedTrackerMetrics();
   
   // Chart refs for PNG export
   const ftdsCpaChartRef = useRef<HTMLDivElement>(null);
