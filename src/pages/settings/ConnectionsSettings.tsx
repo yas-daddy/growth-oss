@@ -282,11 +282,11 @@ export default function ConnectionsSettings() {
   // Check for OAuth callback on mount
   useEffect(() => {
     const code = searchParams.get('code');
-    const metaCallback = searchParams.get('meta_callback');
-    if (code && metaCallback) {
+    const state = searchParams.get('state');
+    if (code && state === 'meta_callback') {
       // Clean up URL params
       searchParams.delete('code');
-      searchParams.delete('meta_callback');
+      searchParams.delete('state');
       setSearchParams(searchParams, { replace: true });
       handleMetaCallback(code);
     }
