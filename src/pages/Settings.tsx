@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { 
   Shield, Database, ChevronRight, Megaphone, Users, Palette, 
-  TrendingUp, RefreshCw, Sparkles, Bell, Scale, Gauge, Lock, MessageSquare, ShieldCheck
+  RefreshCw, Sparkles, Lock, MessageSquare, ShieldCheck, Gauge
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -133,13 +133,8 @@ export default function Settings() {
           title="Auto-Response Rules"
           description="Automated review response settings"
         />
-        <SettingsRow
-          to="/settings/push-settings"
-          icon={<Bell className="h-4 w-4 text-white" />}
-          iconBg="bg-orange-500"
-          title="Push Notifications"
-          description="Braze configuration and AI copy prompt"
-        />
+
+
         <SettingsRow
           to="/settings/compliance"
           icon={<ShieldCheck className="h-4 w-4 text-white" />}
@@ -165,13 +160,8 @@ export default function Settings() {
           title="Affiliate Partners"
           description="Manage affiliate partners and links"
         />
-        <SettingsRow
-          to="/settings/brand-score"
-          icon={<TrendingUp className="h-4 w-4 text-white" />}
-          iconBg="bg-sky-500"
-          title="Brand Score"
-          description="Customize score explanations"
-        />
+
+
         <SettingsRow
           to="/settings/cpa"
           icon={<Gauge className="h-4 w-4 text-white" />}
@@ -179,13 +169,8 @@ export default function Settings() {
           title="CPA Targets"
           description="CPA thermometer thresholds"
         />
-        <SettingsRow
-          to="/settings/rating-weights"
-          icon={<Scale className="h-4 w-4 text-white" />}
-          iconBg="bg-indigo-500"
-          title="Rating Weights"
-          description="Channel contribution to overall rating"
-        />
+
+
       </SettingsSection>
 
       {/* Access */}

@@ -387,18 +387,14 @@ function useYesterdayCPA() {
     queryFn: async () => {
       const yesterday = format(subDays(new Date(), 1), 'yyyy-MM-dd');
       
-      const [spendResult, funnelResult] = await Promise.all([
-        supabase.from('daily_ad_spend').select('spend').eq('date', yesterday),
-        supabase.from('daily_funnel_metrics').select('unique_ftds').eq('date', yesterday)
-      ]);
+      const spendResult = await supabase.from('daily_ad_spend').select('spend').eq('date', yesterday);
 
       const totalSpend = spendResult.data?.reduce((sum, r) => sum + Number(r.spend || 0), 0) || 0;
-      const totalFTDs = funnelResult.data?.reduce((sum, r) => sum + (r.unique_ftds || 0), 0) || 0;
       
       return {
         spend: totalSpend,
-        ftds: totalFTDs,
-        cpa: totalFTDs > 0 ? totalSpend / totalFTDs : null
+        ftds: 0,
+        cpa: null
       };
     }
   });
@@ -418,16 +414,12 @@ function useMTDBlendedCPA() {
     queryKey: ['mtd-blended-cpa-home', monthStart, todayStr],
     queryFn: async () => {
       // Current period CPA and FTDs
-      const [cpaResult, funnelResult, prevCpaResult] = await Promise.all([
-        supabase.rpc('get_report_blended_cpa', {
+      const [cpaResult, prevCpaResult] = await Promise.all([
+        (supabase.rpc as any)('get_report_blended_cpa', {
           start_date: monthStart,
           end_date: todayStr
         }),
-        supabase.from('daily_funnel_metrics')
-          .select('unique_ftds')
-          .gte('date', monthStart)
-          .lte('date', todayStr),
-        supabase.rpc('get_report_blended_cpa', {
+        (supabase.rpc as any)('get_report_blended_cpa', {
           start_date: prevMonthStart,
           end_date: prevMonthEnd
         })
@@ -441,9 +433,8 @@ function useMTDBlendedCPA() {
       const prevValue = Array.isArray(prevCpaResult.data) && prevCpaResult.data.length > 0 
         ? Number(prevCpaResult.data[0]?.value || 0) 
         : 0;
-      const totalFTDs = funnelResult.data?.reduce((sum, r) => sum + (r.unique_ftds || 0), 0) || 0;
 
-      return { value: currentValue, previous_value: prevValue, ftds: totalFTDs };
+      return { value: currentValue, previous_value: prevValue, ftds: 0 };
     }
   });
 }

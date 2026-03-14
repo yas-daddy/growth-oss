@@ -19,9 +19,9 @@ import ConnectionsSettings from "./pages/settings/ConnectionsSettings";
 import SyncSettings from "./pages/settings/SyncSettings";
 import AISettings from "./pages/settings/AISettings";
 import AutoResponsesSettings from "./pages/settings/AutoResponsesSettings";
-import PushSettings from "./pages/settings/PushSettings";
+
 import CPASettings from "./pages/settings/CPASettings";
-import RatingWeightsSettings from "./pages/settings/RatingWeightsSettings";
+
 import SecuritySettings from "./pages/settings/SecuritySettings";
 import AppearanceSettings from "./pages/settings/AppearanceSettings";
 import Projections from "./pages/Projections";
@@ -35,13 +35,7 @@ import KeywordAnalysis from "./pages/KeywordAnalysis";
 import AutomationRules from "./pages/AutomationRules";
 import Recommendations from "./pages/Recommendations";
 import AudienceAnalysis from "./pages/AudienceAnalysis";
-import BrandVisibility from "./pages/BrandVisibility";
-import BrandScoreSettings from "./pages/BrandScoreSettings";
-import FootballAds from "./pages/FootballAds";
 import CampaignPerformance from "./pages/CampaignPerformance";
-import PushNotifications from "./pages/PushNotifications";
-import EmailCampaigns from "./pages/EmailCampaigns";
-import EmailCampaignDetail from "./pages/EmailCampaignDetail";
 import CompetitorAds from "./pages/CompetitorAds";
 import ComplianceChecker from "./pages/ComplianceChecker";
 import ComplianceSettings from "./pages/settings/ComplianceSettings";
@@ -78,7 +72,7 @@ const App = () => (
               
               {/* Non-dashboard pages */}
               <Route path="/projections" element={<ProtectedRoute><Projections /></ProtectedRoute>} />
-              <Route path="/brand-visibility" element={<ProtectedRoute><BrandVisibility /></ProtectedRoute>} />
+              
               <Route path="/top-ads" element={<ProtectedRoute><TopAds /></ProtectedRoute>} />
               <Route path="/creative-analysis" element={<ProtectedRoute><CreativeAnalysis /></ProtectedRoute>} />
               <Route path="/keyword-analysis" element={<ProtectedRoute><KeywordAnalysis /></ProtectedRoute>} />
@@ -86,10 +80,8 @@ const App = () => (
               <Route path="/recommendations" element={<ProtectedRoute><Recommendations /></ProtectedRoute>} />
               <Route path="/automation-rules" element={<ProtectedRoute><AutomationRules /></ProtectedRoute>} />
               <Route path="/launch-ads" element={<ProtectedRoute><LaunchAds /></ProtectedRoute>} />
-              <Route path="/football-ads" element={<ProtectedRoute><FootballAds /></ProtectedRoute>} />
-              <Route path="/push-notifications" element={<ProtectedRoute><PushNotifications /></ProtectedRoute>} />
-              <Route path="/email-campaigns" element={<ProtectedRoute><EmailCampaigns /></ProtectedRoute>} />
-              <Route path="/email-campaigns/:campaignId" element={<ProtectedRoute><EmailCampaignDetail /></ProtectedRoute>} />
+
+
               <Route path="/campaign-performance" element={<ProtectedRoute><CampaignPerformance /></ProtectedRoute>} />
               <Route path="/competitor-ads" element={<ProtectedRoute><CompetitorAds /></ProtectedRoute>} />
               <Route path="/compliance" element={<ProtectedRoute><ComplianceChecker /></ProtectedRoute>} />
@@ -101,9 +93,9 @@ const App = () => (
               <Route path="/settings/syncs" element={<ProtectedRoute><SyncSettings /></ProtectedRoute>} />
               <Route path="/settings/ai" element={<ProtectedRoute><AISettings /></ProtectedRoute>} />
               <Route path="/settings/auto-responses" element={<ProtectedRoute><AutoResponsesSettings /></ProtectedRoute>} />
-              <Route path="/settings/push-settings" element={<ProtectedRoute><PushSettings /></ProtectedRoute>} />
+              
               <Route path="/settings/cpa" element={<ProtectedRoute><CPASettings /></ProtectedRoute>} />
-              <Route path="/settings/rating-weights" element={<ProtectedRoute><RatingWeightsSettings /></ProtectedRoute>} />
+              
               <Route path="/settings/security" element={<ProtectedRoute><SecuritySettings /></ProtectedRoute>} />
               <Route path="/settings/appearance" element={<ProtectedRoute><AppearanceSettings /></ProtectedRoute>} />
               <Route path="/settings/compliance" element={<ProtectedRoute><ComplianceSettings /></ProtectedRoute>} />
@@ -111,7 +103,7 @@ const App = () => (
               <Route path="/settings/affiliates" element={<ProtectedRoute><AffiliateSettings /></ProtectedRoute>} />
               <Route path="/settings/affiliates/:id" element={<ProtectedRoute><AffiliateDetail /></ProtectedRoute>} />
               <Route path="/settings/users" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
-              <Route path="/settings/brand-score" element={<ProtectedRoute><BrandScoreSettings /></ProtectedRoute>} />
+              
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

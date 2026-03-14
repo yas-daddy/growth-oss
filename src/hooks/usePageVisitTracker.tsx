@@ -1,8 +1,8 @@
 import { useMemo, useCallback, useRef } from 'react';
 import { useUserPreference } from './useUserPreferences';
 import {
-  LayoutDashboard, Star, Calendar, CalendarDays, BarChart3, Rocket, Film, BarChart2,
-  Search, PieChart, Activity, Lightbulb, Zap, Eye, Trophy, Bell, TrendingUp
+  Star, Calendar, CalendarDays, BarChart3, Rocket, Film, BarChart2,
+  Search, PieChart, Activity, Lightbulb, Zap
 } from 'lucide-react';
 import { LucideIcon } from 'lucide-react';
 
@@ -15,15 +15,15 @@ const PAGE_METADATA: Record<string, PageMeta> = {
   '/recommendations': { title: 'Recommendations', icon: Lightbulb },
   '/projections': { title: 'Projections', icon: Calendar },
   '/ratings': { title: 'Review Manager', icon: Star },
-  '/push-notifications': { title: 'Push Notifications', icon: Bell },
+  
   '/automation-rules': { title: 'Automation Rules', icon: Zap },
   '/launch-ads': { title: 'Launch Ads', icon: Rocket },
   '/top-ads': { title: 'Top Ads', icon: Film },
   '/creative-analysis': { title: 'Creative Analysis', icon: BarChart2 },
   '/keyword-analysis': { title: 'Keyword Analysis', icon: Search },
   '/audience-analysis': { title: 'Audience Analysis', icon: PieChart },
-  '/football-ads': { title: 'Football Ads', icon: Trophy },
-  '/brand-visibility': { title: 'Brand Score', icon: Eye },
+
+
 };
 
 // Paths we never track

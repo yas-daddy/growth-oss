@@ -109,8 +109,8 @@ export function TableReport({ slug, startDate, endDate }: TableReportProps) {
         return null;
       }
 
-      const { data, error } = await supabase.rpc(
-        definition.data_source as 'get_report_channel_performance' | 'get_report_affiliate_performance' | 'get_report_campaign_performance',
+      const { data, error } = await (supabase.rpc as any)(
+        definition.data_source,
         { start_date: startDate, end_date: endDate }
       );
 

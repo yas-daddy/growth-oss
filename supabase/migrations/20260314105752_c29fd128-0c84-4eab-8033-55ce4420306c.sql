@@ -1,0 +1,53 @@
+
+-- Drop betting-specific tables
+DROP TABLE IF EXISTS generated_football_ads CASCADE;
+DROP TABLE IF EXISTS football_team_scores CASCADE;
+DROP TABLE IF EXISTS football_fixtures CASCADE;
+DROP TABLE IF EXISTS football_teams CASCADE;
+DROP TABLE IF EXISTS push_notification_schedules CASCADE;
+DROP TABLE IF EXISTS email_campaign_schedules CASCADE;
+DROP TABLE IF EXISTS email_campaign_settings CASCADE;
+DROP TABLE IF EXISTS weekly_brand_scores CASCADE;
+DROP TABLE IF EXISTS daily_nps_metrics CASCADE;
+DROP TABLE IF EXISTS daily_revenue_metrics CASCADE;
+DROP TABLE IF EXISTS daily_funnel_metrics CASCADE;
+DROP TABLE IF EXISTS user_ftd_dates CASCADE;
+DROP TABLE IF EXISTS user_identity_map CASCADE;
+DROP TABLE IF EXISTS range_metrics_cache CASCADE;
+DROP TABLE IF EXISTS channel_weights CASCADE;
+DROP TABLE IF EXISTS brand_score_explanations CASCADE;
+
+-- Drop betting-specific DB functions
+DROP FUNCTION IF EXISTS public.get_report_cvr_ftd_std(date, date);
+DROP FUNCTION IF EXISTS public.get_report_cvr_install_signup(date, date);
+DROP FUNCTION IF EXISTS public.get_report_cvr_install_std(date, date);
+DROP FUNCTION IF EXISTS public.get_report_cvr_signup_ftd(date, date);
+DROP FUNCTION IF EXISTS public.get_report_ftd_count(date, date);
+DROP FUNCTION IF EXISTS public.get_report_ftds_by_channel(date, date);
+DROP FUNCTION IF EXISTS public.get_report_blended_cpa(date, date);
+DROP FUNCTION IF EXISTS public.get_report_blended_roas(date, date);
+DROP FUNCTION IF EXISTS public.get_report_cpa_excl_affiliates(date, date);
+DROP FUNCTION IF EXISTS public.get_report_cpa_by_channel(date, date);
+DROP FUNCTION IF EXISTS public.get_report_avg_deposit_per_ftd(date, date);
+DROP FUNCTION IF EXISTS public.get_report_avg_deposit_per_ftd_cached(date, date);
+DROP FUNCTION IF EXISTS public.get_report_avg_net_per_ftd(date, date);
+DROP FUNCTION IF EXISTS public.get_report_avg_net_per_ftd_cached(date, date);
+DROP FUNCTION IF EXISTS public.get_report_new_users_net_deposits(date, date);
+DROP FUNCTION IF EXISTS public.get_report_new_users_net_deposits_cached(date, date);
+DROP FUNCTION IF EXISTS public.get_report_ftd_cohort_deposits(date, date);
+DROP FUNCTION IF EXISTS public.get_report_ftd_cohort_deposits_cached(date, date);
+DROP FUNCTION IF EXISTS public.get_report_hvp_count(date, date);
+DROP FUNCTION IF EXISTS public.get_report_funnel_data(date, date);
+DROP FUNCTION IF EXISTS public.get_report_daily_spend_by_channel(date, date);
+DROP FUNCTION IF EXISTS public.get_report_channel_performance(date, date);
+DROP FUNCTION IF EXISTS public.get_report_campaign_performance(date, date);
+DROP FUNCTION IF EXISTS public.get_report_cpa_per_channel_weekly(date, date);
+DROP FUNCTION IF EXISTS public.get_report_cpa_per_channel_weekly(text, text);
+DROP FUNCTION IF EXISTS public.get_daily_channel_cpa(date, date, text);
+DROP FUNCTION IF EXISTS public.get_ftd_cohort_deposits(timestamptz, timestamptz);
+DROP FUNCTION IF EXISTS public.get_ftd_cohort_net_deposits(timestamptz, timestamptz);
+DROP FUNCTION IF EXISTS public.get_report_affiliate_ftds(date, date);
+DROP FUNCTION IF EXISTS public.get_report_affiliate_count(date, date);
+DROP FUNCTION IF EXISTS public.get_report_affiliate_spend(date, date);
+DROP FUNCTION IF EXISTS public.get_report_affiliate_performance(date, date);
+DROP FUNCTION IF EXISTS public.populate_user_ftd_dates();

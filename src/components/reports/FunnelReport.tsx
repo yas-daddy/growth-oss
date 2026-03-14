@@ -53,7 +53,7 @@ export function FunnelReport({ slug, startDate, endDate }: FunnelReportProps) {
     queryFn: async () => {
       if (!definition?.data_source || !startDate || !endDate) return null;
       
-      const { data, error } = await supabase.rpc(definition.data_source as 'get_report_funnel_data' | 'get_report_top_funnel', {
+      const { data, error } = await (supabase.rpc as any)(definition.data_source, {
         start_date: startDate,
         end_date: endDate,
       });

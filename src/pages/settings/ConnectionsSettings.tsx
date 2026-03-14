@@ -15,7 +15,7 @@ import { useGooglePlayStats, useSyncGooglePlayReviews } from '@/hooks/useGoogleP
 import { useAppStoreStats, useSyncAppStoreReviews } from '@/hooks/useAppStoreReviews';
 import { useTypeformStats } from '@/hooks/useTypeformSurveys';
 import { useOrganicInstallsStats, useSyncOrganicInstalls, useSearchConsoleStats, useSyncSearchConsole } from '@/hooks/useOrganicInstalls';
-import { useFootballFixtures } from '@/hooks/useFootballFixtures';
+
 import { useUserRole } from '@/hooks/useUserRole';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -42,14 +42,12 @@ export default function ConnectionsSettings() {
   const { mutate: syncOrganicInstalls, isPending: isOrganicInstallsSyncing } = useSyncOrganicInstalls();
   const { data: searchConsoleStats } = useSearchConsoleStats();
   const { mutate: syncSearchConsole, isPending: isSearchConsoleSyncing } = useSyncSearchConsole();
-  const { fixtures, isSyncing: isFixturesSyncing, syncFixtures } = useFootballFixtures();
 
   const isMetaConnected = metaCampaigns.length > 0 || (metaSummary?.totalCampaigns ?? 0) > 0;
   const isAppsFlyerConnected = (appsFlyerCampaigns?.length ?? 0) > 0;
   const appsFlyerLastSynced = appsFlyerCampaigns?.[0]?.synced_at ? new Date(appsFlyerCampaigns[0].synced_at) : null;
   const isMixpanelConnected = (mixpanelEvents?.length ?? 0) > 0;
   const mixpanelLastSynced = mixpanelEvents?.[0]?.synced_at ? new Date(mixpanelEvents[0].synced_at) : null;
-  const isFixturesConnected = fixtures.length > 0;
 
   const apiConnections = [
     { name: 'Meta Ads', type: 'Ad Platform', isConnected: isMetaConnected, lastSynced: metaSummary?.lastSyncedAt ? new Date(metaSummary.lastSyncedAt) : null, onSync: syncMeta, isSyncing: isMetaSyncing },
@@ -63,7 +61,7 @@ export default function ConnectionsSettings() {
     { name: 'Typeform Surveys', type: 'Surveys (Webhook)', isConnected: typeformStats.totalResponses > 0, lastSynced: typeformStats.lastSynced ? new Date(typeformStats.lastSynced) : null, onSync: null, isSyncing: false },
     { name: 'Google Search Console', type: 'Brand Visibility', isConnected: (searchConsoleStats?.totalRecords ?? 0) > 0, lastSynced: searchConsoleStats?.lastSynced ? new Date(searchConsoleStats.lastSynced) : null, onSync: () => syncSearchConsole(), isSyncing: isSearchConsoleSyncing },
     { name: 'App Store Analytics', type: 'Brand Visibility', isConnected: (organicInstallsStats?.totalRecords ?? 0) > 0, lastSynced: organicInstallsStats?.lastSynced ? new Date(organicInstallsStats.lastSynced) : null, onSync: () => syncOrganicInstalls(), isSyncing: isOrganicInstallsSyncing },
-    { name: 'Football Fixtures & Odds', type: 'Sports & Odds', isConnected: isFixturesConnected, lastSynced: fixtures[0]?.updated_at ? new Date(fixtures[0].updated_at) : null, onSync: syncFixtures, isSyncing: isFixturesSyncing },
+    
   ];
 
   const handleSyncClick = (api: { name: string; onSync: () => void }) => {

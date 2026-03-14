@@ -78,9 +78,9 @@ export function useReport(slug: string, options: UseReportOptions) {
         ? { p_start_date: startDate, p_end_date: endDate }
         : { start_date: startDate, end_date: endDate };
 
-      const { data: currentData, error: currentError } = await supabase.rpc(
-        definition.data_source as KpiRpcFunction,
-        currentParams as any
+      const { data: currentData, error: currentError } = await (supabase.rpc as any)(
+        definition.data_source,
+        currentParams
       );
 
       if (currentError) {
@@ -124,12 +124,12 @@ export function useReport(slug: string, options: UseReportOptions) {
           ? { p_start_date: prevStartDate, p_end_date: prevEndDate }
           : { start_date: prevStartDate, end_date: prevEndDate };
 
-        const { data: prevData, error: prevError } = await supabase.rpc(
-          definition.data_source as KpiRpcFunction,
-          prevParams as any
+        const { data: prevData, error: prevError } = await (supabase.rpc as any)(
+          definition.data_source,
+          prevParams
         );
 
-        if (!prevError && prevData && prevData.length > 0) {
+        if (!prevError && prevData && (prevData as any[]).length > 0) {
           previousValue = Number(prevData[0]?.value || 0);
         }
       }

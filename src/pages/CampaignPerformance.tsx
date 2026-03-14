@@ -141,7 +141,7 @@ function FilteredDailySpendChart({ chartData, selectedChannel, startDate, endDat
     queryKey: ['daily-channel-cpa', selectedChannel, startDate, endDate],
     queryFn: async () => {
       if (selectedChannel === 'all' || !startDate || !endDate) return null;
-      const { data, error } = await supabase.rpc('get_daily_channel_cpa', {
+      const { data, error } = await (supabase.rpc as any)('get_daily_channel_cpa', {
         p_start_date: startDate,
         p_end_date: endDate,
         p_channel: selectedChannel,

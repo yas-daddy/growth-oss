@@ -36,11 +36,11 @@ const SYNC_FUNCTIONS = [
   { name: 'app-store-sync', display: 'App Store Reviews', category: 'Reviews' },
   { name: 'google-play-sync', display: 'Google Play Reviews', category: 'Reviews' },
   { name: 'trustpilot-sync', display: 'Trustpilot Reviews', category: 'Reviews' },
-  { name: 'fetch-football-fixtures', display: 'Football Fixtures', category: 'Sports & Odds' },
-  { name: 'fetch-betting-odds', display: 'Betting Odds', category: 'Sports & Odds' },
+
+
   { name: 'calculate-weekly-metrics', display: 'Weekly Metrics', category: 'Calculations' },
   { name: 'calculate-monthly-metrics', display: 'Monthly Metrics', category: 'Calculations' },
-  { name: 'populate-funnel-metrics', display: 'Funnel Metrics', category: 'Calculations' },
+  
   { name: 'auto-respond-reviews', display: 'Auto-Respond Reviews', category: 'Automation' },
 ];
 

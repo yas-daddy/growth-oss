@@ -24,17 +24,13 @@ import {
   Search,
   Zap,
   Lightbulb,
-  Eye,
   Home,
-  Trophy,
-  Bell,
-  Mail,
   ChevronRight
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import stakemateLogo from '@/assets/stakemate-logo.png';
+
 import { useUserRole } from '@/hooks/useUserRole';
 import { useAllDashboards } from '@/hooks/useDashboardConfig';
 import { DashboardManagerDialog, getIconComponent } from '@/components/dashboard/DashboardManagerDialog';
@@ -85,15 +81,11 @@ const automateNavItems = [
   { title: 'Recommendations', url: '/recommendations', icon: Lightbulb, badge: 'ai' as const },
   { title: 'Compliance', url: '/compliance', icon: Shield, badge: 'ai' as const },
   { title: 'Review Manager', url: '/ratings', icon: Star },
-  { title: 'Push Notifications', url: '/push-notifications', icon: Bell, badge: 'new' as const },
 ];
 
 // Experimental features
 const experimentalNavItems = [
   { title: 'Competitor Ads', url: '/competitor-ads', icon: Megaphone, badge: 'beta' as const },
-  { title: 'Football Ads', url: '/football-ads', icon: Trophy, badge: 'alpha' as const },
-  { title: 'Brand Score', url: '/brand-visibility', icon: Eye, badge: 'beta' as const },
-  { title: 'Canvas Scheduler', url: '/email-campaigns', icon: Mail, badge: 'new' as const },
 ];
 
 const systemNavItems = [
@@ -175,16 +167,13 @@ export function AppSidebar() {
       <Sidebar collapsible="offcanvas" className="border-r border-sidebar-border">
         <SidebarHeader className="p-4">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg overflow-hidden flex-shrink-0">
-              <img src={stakemateLogo} alt="Stakemate" className="w-full h-full object-cover" />
+            <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
+              <span className="text-primary-foreground font-bold text-sm">G</span>
             </div>
             {!collapsed && (
               <div className="flex flex-col">
                 <div className="flex items-center gap-2">
                   <span className="font-semibold text-sm text-sidebar-foreground">GrowthOS</span>
-                  <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 border-primary/40 text-primary">
-                    Beta
-                  </Badge>
                 </div>
                 <span className="text-xs text-muted-foreground">Marketing Command Centre</span>
               </div>
