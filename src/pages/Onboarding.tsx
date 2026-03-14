@@ -9,7 +9,8 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Building2, Plug, Target, ArrowRight, ArrowLeft, Check, Loader2, BarChart3 } from 'lucide-react';
+import { Building2, Plug, Target, ArrowRight, ArrowLeft, Check, Loader2 } from 'lucide-react';
+import gosLogo from '@/assets/gos-logo.png';
 
 const PROVIDERS = [
   { type: 'meta_ads', label: 'Meta Ads', method: 'oauth', description: 'Facebook & Instagram advertising' },
@@ -163,9 +164,7 @@ export default function Onboarding() {
 
       {/* Logo */}
       <div className="mb-8 flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-glow">
-          <BarChart3 className="h-5 w-5 text-primary-foreground" />
-        </div>
+        <img src={gosLogo} alt="GrowthOS" className="w-10 h-10 rounded-xl shadow-glow" />
         <span className="text-xl font-bold text-foreground">GrowthOS</span>
       </div>
 
