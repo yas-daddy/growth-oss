@@ -266,7 +266,10 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="border-t border-border py-8">
         <div className="mx-auto max-w-6xl px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-          <span className="font-semibold gradient-text">GrowthOS</span>
+          <div className="flex items-center gap-4">
+            <span className="font-semibold gradient-text">GrowthOS</span>
+            <Link to="/docs" className="hover:text-foreground transition-colors">Docs</Link>
+          </div>
           <span>© {new Date().getFullYear()} GrowthOS. All rights reserved.</span>
         </div>
       </footer>
