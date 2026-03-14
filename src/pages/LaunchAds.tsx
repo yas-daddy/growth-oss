@@ -926,7 +926,10 @@ export default function LaunchAds() {
   return (
     <>
       <div className="space-y-6">
-        <ConnectProvidersAlert />
+        <ConnectProvidersAlert
+          requiredProvider="meta_ads"
+          message="Connect your Meta Ads account to load campaigns, upload media, and launch ads."
+        />
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-2xl font-semibold text-foreground">Launch Ads</h1>
