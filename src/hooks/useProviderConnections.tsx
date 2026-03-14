@@ -47,20 +47,20 @@ export function useUpsertProviderConnection() {
     }) => {
       if (!organization) throw new Error('No organization');
 
-      const { data, error } = await supabase
+      const { data, error } = await (supabase
         .from('provider_connections')
         .upsert({
           org_id: organization.id,
-          provider: params.provider,
-          auth_method: params.auth_method,
+          provider: params.provider as any,
+          auth_method: params.auth_method as any,
           credentials: params.credentials,
           display_name: params.display_name || null,
-          status: 'connected',
+          status: 'connected' as const,
           connected_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         }, { onConflict: 'org_id,provider' })
         .select()
-        .single();
+        .single());
 
       if (error) throw error;
       return data;
