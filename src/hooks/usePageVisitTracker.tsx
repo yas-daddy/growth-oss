@@ -15,7 +15,7 @@ const PAGE_METADATA: Record<string, PageMeta> = {
   '/recommendations': { title: 'Recommendations', icon: Lightbulb },
   '/projections': { title: 'Projections', icon: Calendar },
   '/ratings': { title: 'Review Manager', icon: Star },
-  '/push-notifications': { title: 'Push Notifications', icon: Bell },
+  
   '/automation-rules': { title: 'Automation Rules', icon: Zap },
   '/launch-ads': { title: 'Launch Ads', icon: Rocket },
   '/top-ads': { title: 'Top Ads', icon: Film },
