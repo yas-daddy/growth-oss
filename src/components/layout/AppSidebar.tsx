@@ -111,7 +111,8 @@ export function AppSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut, user } = useAuth();
-  const { role, isAdmin, isAffiliate, canViewDashboard, affiliateIds, isLoading: roleLoading } = useUserRole();
+  const { role, isAdmin, isSuperAdmin, isAffiliate, canViewDashboard, affiliateIds, isLoading: roleLoading } = useUserRole();
+  const { organization, allOrganizations, switchOrganization, isSuperAdmin: orgIsSuperAdmin } = useOrganization();
   const { data: dashboards = [] } = useAllDashboards();
   const [managerOpen, setManagerOpen] = useState(false);
   const { value: sectionState, setValue: setSectionState } = useUserPreference<Record<string, boolean>>('sidebar_sections_state', {});
