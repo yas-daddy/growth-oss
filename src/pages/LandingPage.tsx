@@ -98,6 +98,7 @@ export default function LandingPage() {
           <Link to="/" className="flex items-center gap-2">
             <img src={gosLogo} alt="GrowthOS" className="h-8 w-8 rounded-lg" />
             <span className="text-xl font-bold gradient-text">GrowthOS</span>
+            <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 font-semibold uppercase tracking-wider border-primary/40 text-primary">Beta</Badge>
           </Link>
           <div className="flex items-center gap-3">
             {user ? (
