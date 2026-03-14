@@ -8,6 +8,8 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { ChartExportButton } from '@/components/charts/ChartExportButton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { generateCsv, downloadCsv, MetricRow } from '@/lib/exportCsv';
+import { useResolvedTrackerMetrics } from '@/hooks/useTrackerMetricConfig';
+import { groupMetricsBySection, formatMetricValue } from '@/lib/trackerMetricDefinitions';
 
 type WeekRange = '3w' | '5w' | '8w';
 function formatCurrency(value: number): string {
