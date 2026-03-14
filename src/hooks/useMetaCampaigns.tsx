@@ -80,7 +80,9 @@ export function useMetaCampaigns() {
 
   const syncMutation = useMutation({
     mutationFn: async () => {
-      const { data, error } = await supabase.functions.invoke('meta-sync-campaigns');
+      const { data, error } = await supabase.functions.invoke('meta-sync-campaigns', {
+        body: { org_id: organization?.id },
+      });
       if (error) throw error;
       if (data.error) throw new Error(data.error);
       return data;
