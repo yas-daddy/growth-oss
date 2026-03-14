@@ -1,5 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { startSyncLog, completeSyncLog } from "../_shared/sync-logger.ts";
+import { getTenantCredentials, updateLastSyncedAt } from "../_shared/tenant-credentials.ts";
+import { resolveOrgContext } from "../_shared/org-resolver.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -9,9 +11,7 @@ const corsHeaders = {
 const MOLOCO_AUTH_URL = 'https://api.moloco.cloud/cm/v1/auth/tokens';
 const MOLOCO_API_URL = 'https://api.moloco.cloud/cm/v1';
 
-async function getAccessToken(): Promise<string> {
-  const apiKey = Deno.env.get('MOLOCO_API_KEY')!;
-  
+async function getMolocoAccessToken(apiKey: string): Promise<string> {
   console.log('Getting Moloco access token...');
   
   const response = await fetch(MOLOCO_AUTH_URL, {
