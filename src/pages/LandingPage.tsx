@@ -124,7 +124,9 @@ export default function LandingPage() {
 
       {/* Hero */}
       <section className="relative pt-32 pb-20 md:pt-44 md:pb-32 overflow-hidden">
-        <div className="absolute inset-0 gradient-primary opacity-[0.06] pointer-events-none" />
+        <img src={heroImage} alt="" className="absolute inset-0 w-full h-full object-cover opacity-[0.12] pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-background/80 to-background pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent pointer-events-none" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-primary/10 blur-[120px] pointer-events-none" />
         <div className="relative mx-auto max-w-4xl text-center px-6">
           <Badge variant="secondary" className="mb-6 text-xs font-medium tracking-wide">
@@ -146,9 +148,6 @@ export default function LandingPage() {
             <Button size="lg" variant="outline" asChild className="px-8 text-base">
               <a href="mailto:hello@growthOS.app">Book a Demo</a>
             </Button>
-          </div>
-          <div className="mt-14 mx-auto max-w-3xl">
-            <img src={heroImage} alt="GrowthOS platform" className="w-full rounded-2xl shadow-2xl" />
           </div>
         </div>
       </section>
