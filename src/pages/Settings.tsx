@@ -105,8 +105,8 @@ export default function Settings() {
           to="/settings/connections"
           icon={<Database className="h-4 w-4 text-white" />}
           iconBg="bg-blue-500"
-          title="API Connections"
-          description="Connected platforms and sync status"
+          title="Partners"
+          description="Connect ad platforms, analytics, and review services"
         />
         <SettingsRow
           to="/settings/syncs"
