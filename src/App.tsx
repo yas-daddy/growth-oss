@@ -42,6 +42,9 @@ import CompetitorAds from "./pages/CompetitorAds";
 import ComplianceChecker from "./pages/ComplianceChecker";
 import ComplianceSettings from "./pages/settings/ComplianceSettings";
 import ConversionEventsSettings from "./pages/settings/ConversionEventsSettings";
+import PlatformManagement from "./pages/settings/PlatformManagement";
+import GlobalAPIKeys from "./pages/settings/GlobalAPIKeys";
+import OrganizationsSettings from "./pages/settings/OrganizationsSettings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
