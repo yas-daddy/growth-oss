@@ -78,7 +78,7 @@ const handler = async (req: Request): Promise<Response> => {
         <body>
           <div class="container">
             <h1>You're Invited!</h1>
-            <p>${inviterName ? `${inviterName} has` : "You've been"} invited you to join Stakemate as a <strong>${roleDescription}</strong>.</p>
+            <p>${inviterName ? `${inviterName} has` : "You've been"} invited you to join GrowthOS as a <strong>${roleDescription}</strong>.</p>
             
             <div class="highlight">
               <p>Sign up with this email address (<strong>${email}</strong>) to accept the invitation and get started.</p>
