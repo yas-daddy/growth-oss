@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { 
   Shield, Database, ChevronRight, Megaphone, Users, Palette, 
-  TrendingUp, RefreshCw, Sparkles, Bell, Scale, Gauge, Lock, MessageSquare, ShieldCheck
+  RefreshCw, Sparkles, Lock, MessageSquare, ShieldCheck, Gauge
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 

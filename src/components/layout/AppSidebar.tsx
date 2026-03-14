@@ -24,11 +24,7 @@ import {
   Search,
   Zap,
   Lightbulb,
-  Eye,
   Home,
-  Trophy,
-  Bell,
-  Mail,
   ChevronRight
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
