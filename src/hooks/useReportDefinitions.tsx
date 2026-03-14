@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useOrganization } from '@/hooks/useOrganization';
 
 export interface ReportConfig {
   variant?: 'primary' | 'accent' | 'default';
@@ -24,6 +25,8 @@ export interface ReportConfig {
     badgeColors?: Record<string, { bg: string; text: string }>;
     badgeLabels?: Record<string, string>;
   }>;
+  // Conversion event override (for generic RPC functions)
+  eventName?: string;
 }
 
 export interface ReportDefinition {
@@ -35,20 +38,26 @@ export interface ReportDefinition {
   report_type: 'kpi' | 'chart' | 'table';
   config: ReportConfig;
   data_source: string;
+  org_id: string | null;
   created_at: string;
   updated_at: string;
 }
 
 export function useReportDefinitions(category?: string) {
   const { user } = useAuth();
+  const { organization } = useOrganization();
 
   return useQuery({
-    queryKey: ['report-definitions', category],
+    queryKey: ['report-definitions', category, organization?.id],
     queryFn: async () => {
       let query = supabase
         .from('report_definitions')
         .select('*')
         .order('created_at', { ascending: true });
+
+      if (organization) {
+        query = query.eq('org_id', organization.id);
+      }
 
       if (category) {
         query = query.eq('category', category);
@@ -64,7 +73,7 @@ export function useReportDefinitions(category?: string) {
       return data as ReportDefinition[];
     },
     enabled: !!user,
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    staleTime: 5 * 60 * 1000,
   });
 }
 
@@ -88,6 +97,6 @@ export function useReportDefinition(slug: string) {
       return data as ReportDefinition;
     },
     enabled: !!user && !!slug,
-    staleTime: 30 * 1000, // Reduced cache time
+    staleTime: 30 * 1000,
   });
 }

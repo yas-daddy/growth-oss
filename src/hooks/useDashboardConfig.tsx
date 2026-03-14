@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useOrganization } from '@/hooks/useOrganization';
 import { toast } from 'sonner';
 
 export interface DashboardConfig {
@@ -12,20 +13,28 @@ export interface DashboardConfig {
   display_order: number | null;
   is_deletable: boolean | null;
   description: string | null;
+  org_id: string | null;
   created_at: string;
   updated_at: string;
 }
 
 export function useAllDashboards() {
   const { user } = useAuth();
+  const { organization } = useOrganization();
 
   return useQuery({
-    queryKey: ['all-dashboards'],
+    queryKey: ['all-dashboards', organization?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('dashboard_configs')
         .select('*')
         .order('display_order', { ascending: true });
+
+      if (organization) {
+        query = query.eq('org_id', organization.id);
+      }
+
+      const { data, error } = await query;
 
       if (error) {
         console.error('Error fetching dashboards:', error);
@@ -41,16 +50,18 @@ export function useAllDashboards() {
 
 export function useCreateDashboard() {
   const queryClient = useQueryClient();
+  const { organization } = useOrganization();
 
   return useMutation({
     mutationFn: async ({ name, icon }: { name: string; icon: string }) => {
-      // Generate slug from name
+      if (!organization) throw new Error('No organization');
+
       const slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
       
-      // Get max display order
       const { data: existing } = await supabase
         .from('dashboard_configs')
         .select('display_order')
+        .eq('org_id', organization.id)
         .order('display_order', { ascending: false })
         .limit(1);
       
@@ -65,6 +76,7 @@ export function useCreateDashboard() {
           display_order: nextOrder,
           is_deletable: true,
           report_slugs: [],
+          org_id: organization.id,
         })
         .select()
         .single();
@@ -73,7 +85,7 @@ export function useCreateDashboard() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['all-dashboards'] });
+      queryClient.invalidateQueries({ queryKey: ['all-dashboards', organization?.id] });
       toast.success('Dashboard created');
     },
     onError: (error) => {
@@ -85,6 +97,7 @@ export function useCreateDashboard() {
 
 export function useDeleteDashboard() {
   const queryClient = useQueryClient();
+  const { organization } = useOrganization();
 
   return useMutation({
     mutationFn: async (dashboardSlug: string) => {
@@ -96,7 +109,7 @@ export function useDeleteDashboard() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['all-dashboards'] });
+      queryClient.invalidateQueries({ queryKey: ['all-dashboards', organization?.id] });
       toast.success('Dashboard deleted');
     },
     onError: (error) => {
@@ -108,10 +121,10 @@ export function useDeleteDashboard() {
 
 export function useReorderDashboards() {
   const queryClient = useQueryClient();
+  const { organization } = useOrganization();
 
   return useMutation({
     mutationFn: async (orderedSlugs: string[]) => {
-      // Update each dashboard with its new display_order
       const updates = orderedSlugs.map((slug, index) => 
         supabase
           .from('dashboard_configs')
@@ -126,7 +139,7 @@ export function useReorderDashboards() {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['all-dashboards'] });
+      queryClient.invalidateQueries({ queryKey: ['all-dashboards', organization?.id] });
     },
     onError: (error) => {
       console.error('Error reordering dashboards:', error);
@@ -161,17 +174,14 @@ export function useDashboardConfig(dashboardSlug: string) {
 
 export function useUpdateDashboardConfig() {
   const queryClient = useQueryClient();
+  const { organization } = useOrganization();
 
   return useMutation({
     mutationFn: async ({ dashboardSlug, reportSlugs }: { dashboardSlug: string; reportSlugs: string[] }) => {
       const { data, error } = await supabase
         .from('dashboard_configs')
-        .upsert({
-          dashboard_slug: dashboardSlug,
-          report_slugs: reportSlugs,
-        }, {
-          onConflict: 'dashboard_slug',
-        })
+        .update({ report_slugs: reportSlugs, updated_at: new Date().toISOString() })
+        .eq('dashboard_slug', dashboardSlug)
         .select()
         .single();
 
