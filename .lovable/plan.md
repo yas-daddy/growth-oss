@@ -1,44 +1,46 @@
 
+# Revised Plan: Multi-Tenant B2B SaaS Revamp
 
-# Allow Manual Channel Input for Affiliates
+## Phase 8: Cleanup ✅ DONE
 
-## Overview
-Update the affiliate creation/edit dialog to support both selecting an existing AppsFlyer channel and manually typing a new channel name. This lets you onboard partners before they have any AppsFlyer data.
+Completed:
+- Deleted pages: FootballAds, PushNotifications, EmailCampaigns, EmailCampaignDetail, BrandVisibility, BrandScoreSettings, PushSettings, RatingWeightsSettings
+- Deleted components: football-ads/*, email/*
+- Deleted hooks: useFootballFixtures, useFootballTeams, useFootballTeamScores, useGeneratedAds, usePushNotifications, useEmailCampaigns, useBrandScore, useBrandScoreHistory, useBrandScoreExplanations, useNPSMetrics, useBettingUsers, useChannelWeights, useFunnelData, useUserIdentityMap, useReferralSignups, useAdTemplates
+- Deleted edge functions: generate-football-ad, fetch-football-fixtures, fetch-betting-odds, schedule-match-push, cancel-match-push, generate-push-copy, schedule-email-broadcast, cancel-email-broadcast, generate-email-copy, calculate-brand-scores, calculate-nps-metrics, populate-funnel-metrics, populate-revenue-metrics, populate-user-ftd-dates
+- Dropped tables: football_fixtures, football_teams, football_team_scores, generated_football_ads, push_notification_schedules, email_campaign_schedules, email_campaign_settings, weekly_brand_scores, daily_nps_metrics, daily_revenue_metrics, daily_funnel_metrics, user_ftd_dates, user_identity_map, range_metrics_cache, channel_weights, brand_score_explanations
+- Dropped 30+ betting-specific DB functions
+- Updated App.tsx routes, AppSidebar nav, Settings page, usePageVisitTracker, useSyncFunctionLogs
+- Removed Stakemate logo/branding, removed Beta badge
+- Cast remaining RPC calls to `any` for type safety until generic replacements are built
 
-**Critical**: The channel value must exactly match the `media_source` string that AppsFlyer will later report for that partner, otherwise FTD attribution, spend tracking, and dashboard metrics won't link up.
+## Remaining Phases
 
-## Changes
+### Phase 1: Multi-Tenant Data Model
+- Create tables: organizations, organization_members, provider_connections, conversion_events, tracker_metric_config
+- Add org_id to existing data tables
+- RLS policies scoped by org membership
 
-### `src/components/affiliates/AffiliateDialog.tsx`
+### Phase 2: Organization Context + Onboarding
+- useOrganization React context
+- Post-signup onboarding flow (3 steps)
+- Update all data hooks to filter by org_id
 
-1. **Replace the Select-only channel field** with an `Input` + `datalist` combo that shows existing AppsFlyer channels as autocomplete suggestions but also allows free-text entry.
+### Phase 3: Provider Connections Settings Page
+- Partners page with OAuth (Meta) and API key inputs
+- Credential storage in provider_connections
 
-2. **Add helper text** below the input explaining: "Must exactly match the media source name in AppsFlyer (e.g. `partner_name_int`)."
+### Phase 4: Conversion Events Settings
+- Users define conversion events for CPA tracking
+- Replace hardcoded FTD references
 
-3. **Trim and normalise on submit**: Call `.trim()` on the channel value before saving to avoid accidental whitespace mismatches.
+### Phase 5: Rework Weekly/Monthly Tracker
+- Dynamic metric selection via tracker_metric_config
 
-4. **Remove the `!formData.channel` disable condition** on the submit button — the `required` attribute on the input handles validation natively.
+### Phase 6: Rework Dashboard Report Functions
+- Generic conversion-event-based report functions
+- org_id on report_definitions and dashboard_configs
 
-### Technical Details
+### Phase 7: Update Edge Functions for Per-Tenant Credentials
 
-- Replace the `Select`/`SelectTrigger`/`SelectContent`/`SelectItem` block for channel with:
-  ```tsx
-  <Input
-    id="channel"
-    value={formData.channel}
-    onChange={(e) => setFormData({ ...formData, channel: e.target.value })}
-    list="channel-suggestions"
-    placeholder="Type or select a channel"
-    required
-  />
-  <datalist id="channel-suggestions">
-    {availableChannels.map((ch) => (
-      <option key={ch} value={ch} />
-    ))}
-  </datalist>
-  <p className="text-xs text-muted-foreground">
-    Must exactly match the media source name in AppsFlyer (e.g. partner_name_int)
-  </p>
-  ```
-- In `handleSubmit`, trim the channel: `channel: formData.channel.trim()`
-- Update the label to "Channel (Media Source) *"
+### Phase 9: Auth + Signup Flow Polish
