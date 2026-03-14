@@ -42,14 +42,17 @@ export default function AudienceAnalysis() {
   const [customRange, setCustomRange] = useState<CustomDateRange>({ from: undefined, to: undefined });
   const [selectedCampaign, setSelectedCampaign] = useState<string>('all');
 
+  const { data: connections } = useProviderConnections();
+  const isMetaConnected = connections?.some(c => c.provider === 'meta_ads' && c.status === 'connected');
+
   const dateRange = getDateRange(dateRangeOption, customRange);
   const startDate = dateRange.startDate ? format(dateRange.startDate, 'yyyy-MM-dd') : undefined;
   const endDate = format(dateRange.endDate, 'yyyy-MM-dd');
 
-  const { data, isLoading, refetch, isFetching } = useMetaDemographics(
-    startDate,
-    endDate,
-    selectedCampaign !== 'all' ? selectedCampaign : undefined
+  const { data, isLoading, isError, error, refetch, isFetching } = useMetaDemographics(
+    isMetaConnected ? startDate : undefined,
+    isMetaConnected ? endDate : undefined,
+    isMetaConnected && selectedCampaign !== 'all' ? selectedCampaign : undefined
   );
 
   // Calculate KPIs
