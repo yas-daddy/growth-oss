@@ -51,7 +51,7 @@ Deno.serve(async (req) => {
       throw new Error(`Failed to fetch settings: ${settingsError.message}`);
     }
 
-    // Get custom AI prompt from review_settings
+    // Get custom AI prompt from review_settings (first available org setting)
     const { data: reviewSettings } = await supabase
       .from('review_settings')
       .select('ai_prompt')

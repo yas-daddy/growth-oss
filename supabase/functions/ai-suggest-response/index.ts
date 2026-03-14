@@ -59,12 +59,21 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Get organization-wide custom prompt from review_settings
-    const { data: settings } = await supabaseClient
-      .from("review_settings")
-      .select("ai_prompt")
+    // Resolve user's org to fetch org-scoped review settings
+    const { data: membership } = await supabaseClient
+      .from("organization_members")
+      .select("org_id")
+      .eq("user_id", user.id)
       .limit(1)
       .maybeSingle();
+
+    const { data: settings } = membership?.org_id
+      ? await supabaseClient
+          .from("review_settings")
+          .select("ai_prompt")
+          .eq("org_id", membership.org_id)
+          .maybeSingle()
+      : { data: null };
 
     // Platform-specific character limits
     const getCharLimit = (source: string): number => {

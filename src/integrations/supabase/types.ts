@@ -2572,6 +2572,7 @@ export type Database = {
           email_copy_prompt: string | null
           id: string
           insights_prompt: string | null
+          org_id: string
           push_notification_prompt: string | null
           updated_at: string
           user_id: string
@@ -2583,6 +2584,7 @@ export type Database = {
           email_copy_prompt?: string | null
           id?: string
           insights_prompt?: string | null
+          org_id: string
           push_notification_prompt?: string | null
           updated_at?: string
           user_id: string
@@ -2594,11 +2596,20 @@ export type Database = {
           email_copy_prompt?: string | null
           id?: string
           insights_prompt?: string | null
+          org_id?: string
           push_notification_prompt?: string | null
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "review_settings_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       rule_execution_logs: {
         Row: {

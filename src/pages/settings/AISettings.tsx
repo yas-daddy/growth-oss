@@ -12,9 +12,9 @@ export default function AISettings() {
   const { toast } = useToast();
   const { data: reviewSettings } = useReviewSettings();
   const updateSettingsMutation = useUpdateReviewSettings();
-  const [aiPrompt, setAiPrompt] = useState(DEFAULT_PROMPT);
-  const [insightsPrompt, setInsightsPrompt] = useState(DEFAULT_INSIGHTS_PROMPT);
-  const [emailCopyPrompt, setEmailCopyPrompt] = useState(DEFAULT_EMAIL_COPY_PROMPT);
+  const [aiPrompt, setAiPrompt] = useState('');
+  const [insightsPrompt, setInsightsPrompt] = useState('');
+  const [emailCopyPrompt, setEmailCopyPrompt] = useState('');
 
   useEffect(() => {
     if (reviewSettings?.ai_prompt) setAiPrompt(reviewSettings.ai_prompt);

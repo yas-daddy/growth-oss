@@ -1,9 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
+import { useOrganization } from "./useOrganization";
 
 export interface ReviewSettings {
   id: string;
+  org_id: string;
   user_id: string;
   ai_prompt: string;
   insights_prompt: string;
@@ -30,40 +32,43 @@ Be specific and cite examples from the reviews when possible. If there are no re
 
 export function useReviewSettings() {
   const { user } = useAuth();
+  const { organization } = useOrganization();
 
   return useQuery({
-    queryKey: ["review-settings"],
+    queryKey: ["review-settings", organization?.id],
     queryFn: async (): Promise<ReviewSettings | null> => {
-      // Fetch organization-wide settings (first row, not filtered by user)
+      if (!organization?.id) return null;
       const { data, error } = await supabase
         .from("review_settings")
         .select("*")
-        .limit(1)
+        .eq("org_id", organization.id)
         .maybeSingle();
 
       if (error) throw error;
       return data;
     },
-    enabled: !!user,
+    enabled: !!user && !!organization?.id,
   });
 }
 
 export function useUpdateReviewSettings() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const { organization } = useOrganization();
 
   return useMutation({
     mutationFn: async (settings: { aiPrompt?: string; insightsPrompt?: string; pushNotificationPrompt?: string; brazeCanvasId?: string; emailCopyPrompt?: string }) => {
       if (!user) throw new Error("Not authenticated");
+      if (!organization?.id) throw new Error("No organization context");
 
-      // Check if organization settings already exist
+      // Check if org settings already exist
       const { data: existing } = await supabase
         .from("review_settings")
         .select("id")
-        .limit(1)
+        .eq("org_id", organization.id)
         .maybeSingle();
 
-      const updateData: { ai_prompt?: string; insights_prompt?: string; push_notification_prompt?: string; braze_canvas_id?: string; email_copy_prompt?: string } = {};
+      const updateData: Record<string, string | undefined> = {};
       if (settings.aiPrompt !== undefined) updateData.ai_prompt = settings.aiPrompt;
       if (settings.insightsPrompt !== undefined) updateData.insights_prompt = settings.insightsPrompt;
       if (settings.pushNotificationPrompt !== undefined) updateData.push_notification_prompt = settings.pushNotificationPrompt;
@@ -71,7 +76,6 @@ export function useUpdateReviewSettings() {
       if (settings.emailCopyPrompt !== undefined) updateData.email_copy_prompt = settings.emailCopyPrompt;
 
       if (existing) {
-        // Update existing organization settings
         const { data, error } = await supabase
           .from("review_settings")
           .update(updateData)
@@ -82,10 +86,9 @@ export function useUpdateReviewSettings() {
         if (error) throw error;
         return data;
       } else {
-        // Create new organization settings (use current user as owner)
         const { data, error } = await supabase
           .from("review_settings")
-          .insert({ ...updateData, user_id: user.id })
+          .insert({ ...updateData, org_id: organization.id, user_id: user.id })
           .select()
           .single();
 
@@ -94,7 +97,7 @@ export function useUpdateReviewSettings() {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["review-settings"] });
+      queryClient.invalidateQueries({ queryKey: ["review-settings", organization?.id] });
     },
   });
 }
