@@ -78,9 +78,9 @@ export function useReport(slug: string, options: UseReportOptions) {
         ? { p_start_date: startDate, p_end_date: endDate }
         : { start_date: startDate, end_date: endDate };
 
-      const { data: currentData, error: currentError } = await supabase.rpc(
-        definition.data_source as KpiRpcFunction,
-        currentParams as any
+      const { data: currentData, error: currentError } = await (supabase.rpc as any)(
+        definition.data_source,
+        currentParams
       );
 
       if (currentError) {
