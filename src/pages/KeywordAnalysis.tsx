@@ -28,6 +28,7 @@ import { useAppleKeywordAnalysis, useAppleKeywords, KEYWORD_COLUMN_DEFINITIONS, 
 import { format } from 'date-fns';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ImpressionShareBar } from '@/components/ui/impression-share-bar';
+import { ConnectProvidersAlert } from '@/components/ConnectProvidersAlert';
 import { SignalBars } from '@/components/ui/signal-bars';
 import { ExpandableKeywordRow } from '@/components/keywords/SearchTermBreakdown';
 type SortDirection = 'asc' | 'desc' | null;
