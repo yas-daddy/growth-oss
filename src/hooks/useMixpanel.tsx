@@ -154,7 +154,7 @@ export function useFTDCohortNetDeposits(startDate?: string, endDate?: string) {
       }
       
       // Use database function to calculate server-side (bypasses row limits)
-      const { data, error } = await supabase.rpc('get_ftd_cohort_net_deposits', {
+      const { data, error } = await (supabase.rpc as any)('get_ftd_cohort_net_deposits', {
         start_date: `${startDate}T00:00:00Z`,
         end_date: `${endDate}T23:59:59Z`,
       });

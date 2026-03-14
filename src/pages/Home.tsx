@@ -420,16 +420,12 @@ function useMTDBlendedCPA() {
     queryKey: ['mtd-blended-cpa-home', monthStart, todayStr],
     queryFn: async () => {
       // Current period CPA and FTDs
-      const [cpaResult, funnelResult, prevCpaResult] = await Promise.all([
-        supabase.rpc('get_report_blended_cpa', {
+      const [cpaResult, prevCpaResult] = await Promise.all([
+        (supabase.rpc as any)('get_report_blended_cpa', {
           start_date: monthStart,
           end_date: todayStr
         }),
-        supabase.from('daily_funnel_metrics')
-          .select('unique_ftds')
-          .gte('date', monthStart)
-          .lte('date', todayStr),
-        supabase.rpc('get_report_blended_cpa', {
+        (supabase.rpc as any)('get_report_blended_cpa', {
           start_date: prevMonthStart,
           end_date: prevMonthEnd
         })

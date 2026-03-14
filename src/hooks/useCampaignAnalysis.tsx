@@ -76,10 +76,10 @@ export function useCampaignAnalysis(startDate?: string, endDate?: string) {
       const [current, previousList, ftdCurrent, ftdPrev, spendCurrent, spendPrev] = await Promise.all([
         fetchCampaignMetrics(startDate, endDate),
         fetchCampaignMetrics(prevStartStr, prevEndStr),
-        supabase.rpc('get_report_ftd_count', { start_date: startDate, end_date: endDate }),
-        supabase.rpc('get_report_ftd_count', { start_date: prevStartStr, end_date: prevEndStr }),
-        supabase.rpc('get_report_total_spend', { start_date: startDate, end_date: endDate }),
-        supabase.rpc('get_report_total_spend', { start_date: prevStartStr, end_date: prevEndStr }),
+        (supabase.rpc as any)('get_report_ftd_count', { start_date: startDate, end_date: endDate }),
+        (supabase.rpc as any)('get_report_ftd_count', { start_date: prevStartStr, end_date: prevEndStr }),
+        (supabase.rpc as any)('get_report_total_spend', { start_date: startDate, end_date: endDate }),
+        (supabase.rpc as any)('get_report_total_spend', { start_date: prevStartStr, end_date: prevEndStr }),
       ]);
 
       const previous = new Map<string, CampaignMetrics>();

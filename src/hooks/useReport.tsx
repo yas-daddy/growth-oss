@@ -129,7 +129,7 @@ export function useReport(slug: string, options: UseReportOptions) {
           prevParams
         );
 
-        if (!prevError && prevData && prevData.length > 0) {
+        if (!prevError && prevData && (prevData as any[]).length > 0) {
           previousValue = Number(prevData[0]?.value || 0);
         }
       }
