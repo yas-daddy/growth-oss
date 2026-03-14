@@ -2,6 +2,8 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { startSyncLog, completeSyncLog } from "../_shared/sync-logger.ts";
+import { getTenantCredentials, updateLastSyncedAt } from "../_shared/tenant-credentials.ts";
+import { resolveOrgContext } from "../_shared/org-resolver.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -16,76 +18,30 @@ serve(async (req) => {
   const syncLog = await startSyncLog('meta-sync-campaigns');
 
   try {
-    const metaAccessToken = Deno.env.get('META_ACCESS_TOKEN');
-    let metaAdAccountId = Deno.env.get('META_AD_ACCOUNT_ID');
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const body = await req.json().catch(() => ({}));
+    const { userId, orgId } = await resolveOrgContext(req, body);
 
-    if (metaAdAccountId && !metaAdAccountId.startsWith('act_')) {
-      metaAdAccountId = `act_${metaAdAccountId}`;
-    }
+    // Resolve credentials from tenant or env fallback
+    const { credentials } = await getTenantCredentials('meta_ads', orgId);
+    let metaAccessToken = credentials.access_token;
+    let metaAdAccountId = credentials.ad_account_id;
 
     if (!metaAccessToken || !metaAdAccountId) {
-      console.error('Missing Meta credentials');
       return new Response(
         JSON.stringify({ error: 'Meta credentials not configured' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      return new Response(
-        JSON.stringify({ error: 'Authorization required' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    if (metaAdAccountId && !metaAdAccountId.startsWith('act_')) {
+      metaAdAccountId = `act_${metaAdAccountId}`;
     }
 
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
-    
-    // Try to get user from auth header, or fall back to admin user for service role calls
-    let userId: string;
-    const supabaseAuth = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY')!, {
-      global: { headers: { Authorization: authHeader } }
-    });
-    
-    const { data: { user } } = await supabaseAuth.auth.getUser();
-    if (user) {
-      // Verify user has admin role
-      const { data: userRole } = await supabaseAdmin
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id)
-        .eq('role', 'admin')
-        .maybeSingle();
 
-      if (!userRole) {
-        return new Response(
-          JSON.stringify({ error: 'Admin access required to sync data' }),
-          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      userId = user.id;
-    } else {
-      // Service role call - get first admin user
-      const { data: adminRole } = await supabaseAdmin
-        .from('user_roles')
-        .select('user_id')
-        .eq('role', 'admin')
-        .limit(1)
-        .maybeSingle();
-      
-      if (!adminRole) {
-        return new Response(
-          JSON.stringify({ error: 'No admin user found for service role sync' }),
-          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      userId = adminRole.user_id;
-      console.log(`Service role sync using admin user: ${userId}`);
-    }
-
-    console.log(`Syncing Meta campaigns (daily) for user: ${userId}`);
+    console.log(`Syncing Meta campaigns (daily) for user: ${userId}, org: ${orgId}`);
 
     // Fetch campaign details with budget info
     const campaignsUrl = `https://graph.facebook.com/v21.0/${metaAdAccountId}/campaigns`;
@@ -109,9 +65,7 @@ serve(async (req) => {
         for (const campaign of pageData.data) {
           const dailyBudget = parseFloat(campaign.daily_budget || '0') / 100;
           const lifetimeBudget = parseFloat(campaign.lifetime_budget || '0') / 100;
-          // If no campaign-level budget, it likely uses Ad Set Budget Optimization (ABO)
           const usesAbo = dailyBudget === 0 && lifetimeBudget === 0;
-          // Only count budget for ACTIVE campaigns
           const isActive = campaign.status === 'ACTIVE';
           
           campaignBudgets.set(campaign.id, {
@@ -148,7 +102,6 @@ serve(async (req) => {
         console.error('Meta API error fetching adsets:', pageData.error);
       } else if (pageData.data) {
         for (const adset of pageData.data) {
-          // Only count ACTIVE adsets for budget calculation (not PAUSED or other)
           if (adset.status !== 'ACTIVE') continue;
           
           const campaignId = adset.campaign_id;
@@ -166,22 +119,20 @@ serve(async (req) => {
 
     console.log(`Fetched adset budgets for ${adsetBudgetsByCampaign.size} campaigns`);
 
-    // Merge adset budgets into campaign budgets for ABO campaigns (only if campaign is active)
+    // Merge adset budgets into campaign budgets for ABO campaigns
     for (const [campaignId, budget] of campaignBudgets) {
       if (budget.uses_abo && budget.is_active) {
         const adsetBudget = adsetBudgetsByCampaign.get(campaignId);
         if (adsetBudget) {
           budget.daily_budget = adsetBudget.daily_budget;
           budget.lifetime_budget = adsetBudget.lifetime_budget;
-          console.log(`Campaign ${campaignId} using ABO: daily_budget=${budget.daily_budget}, lifetime_budget=${budget.lifetime_budget}`);
         }
       }
     }
 
-    // Fetch DAILY campaign insights using time_increment=1
-    // Only sync complete days (up to yesterday)
+    // Fetch DAILY campaign insights
     const endDate = new Date();
-    endDate.setDate(endDate.getDate() - 1); // Yesterday
+    endDate.setDate(endDate.getDate() - 1);
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - 90);
     
@@ -190,7 +141,7 @@ serve(async (req) => {
       access_token: metaAccessToken,
       fields: 'campaign_id,campaign_name,spend,impressions,clicks,actions,date_start,date_stop',
       level: 'campaign',
-      time_increment: '1', // Daily breakdown
+      time_increment: '1',
       time_range: JSON.stringify({
         since: startDate.toISOString().split('T')[0],
         until: endDate.toISOString().split('T')[0],
@@ -199,7 +150,6 @@ serve(async (req) => {
 
     console.log(`Fetching daily data from Meta API...`);
     
-    // Fetch all pages of data
     const allRecords: any[] = [];
     let nextUrl: string | null = `${metaUrl}?${params}`;
     
@@ -219,7 +169,6 @@ serve(async (req) => {
         allRecords.push(...pageData.data);
       }
       
-      // Check for next page
       nextUrl = pageData.paging?.next || null;
       if (nextUrl) {
         console.log(`Fetching next page... (${allRecords.length} records so far)`);
@@ -228,7 +177,6 @@ serve(async (req) => {
 
     console.log(`Received ${allRecords.length} total daily records`);
 
-    // supabaseAdmin already created above
     const dailyRecords = allRecords;
     
     // Process daily records for daily_ad_spend table
@@ -250,7 +198,7 @@ serve(async (req) => {
         platform: 'meta',
         campaign_id: record.campaign_id,
         campaign_name: record.campaign_name,
-        date: record.date_start, // For daily data, date_start = date_stop = the day
+        date: record.date_start,
         spend: parseFloat(record.spend || '0'),
         impressions: parseInt(record.impressions || '0', 10),
         clicks: parseInt(record.clicks || '0', 10),
@@ -259,7 +207,7 @@ serve(async (req) => {
       };
     });
 
-    // Upsert daily spend data (unique on platform, campaign_id, date)
+    // Upsert daily spend data
     if (dailySpendData.length > 0) {
       const { error: dailyError } = await supabaseAdmin
         .from('daily_ad_spend')
@@ -315,7 +263,6 @@ serve(async (req) => {
       const cpc = campaign.clicks > 0 ? campaign.spend / campaign.clicks : 0;
       const cpm = campaign.impressions > 0 ? (campaign.spend / campaign.impressions) * 1000 : 0;
 
-      // Get budget info for this campaign
       const budgetInfo = campaignBudgets.get(campaign.campaign_id) || { daily_budget: 0, lifetime_budget: 0 };
 
       const campaignData = {
@@ -366,6 +313,8 @@ serve(async (req) => {
 
     console.log('Sync completed:', summary);
 
+    // Update last_synced_at on the provider connection
+    await updateLastSyncedAt(orgId, 'meta_ads');
     await completeSyncLog(syncLog?.id || null, true);
 
     return new Response(
