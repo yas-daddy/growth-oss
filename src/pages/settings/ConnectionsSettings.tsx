@@ -42,14 +42,12 @@ export default function ConnectionsSettings() {
   const { mutate: syncOrganicInstalls, isPending: isOrganicInstallsSyncing } = useSyncOrganicInstalls();
   const { data: searchConsoleStats } = useSearchConsoleStats();
   const { mutate: syncSearchConsole, isPending: isSearchConsoleSyncing } = useSyncSearchConsole();
-  const { fixtures, isSyncing: isFixturesSyncing, syncFixtures } = useFootballFixtures();
 
   const isMetaConnected = metaCampaigns.length > 0 || (metaSummary?.totalCampaigns ?? 0) > 0;
   const isAppsFlyerConnected = (appsFlyerCampaigns?.length ?? 0) > 0;
   const appsFlyerLastSynced = appsFlyerCampaigns?.[0]?.synced_at ? new Date(appsFlyerCampaigns[0].synced_at) : null;
   const isMixpanelConnected = (mixpanelEvents?.length ?? 0) > 0;
   const mixpanelLastSynced = mixpanelEvents?.[0]?.synced_at ? new Date(mixpanelEvents[0].synced_at) : null;
-  const isFixturesConnected = fixtures.length > 0;
 
   const apiConnections = [
     { name: 'Meta Ads', type: 'Ad Platform', isConnected: isMetaConnected, lastSynced: metaSummary?.lastSyncedAt ? new Date(metaSummary.lastSyncedAt) : null, onSync: syncMeta, isSyncing: isMetaSyncing },
