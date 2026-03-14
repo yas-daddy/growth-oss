@@ -1,5 +1,7 @@
 import { useState, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -329,33 +331,48 @@ export default function ComplianceChecker() {
 
       {/* Step 1: Select content type */}
       {step === 1 && (
-        <div className="grid gap-4 sm:grid-cols-3">
-          {contentTypeCards.map((ct) => (
-            <Card
-              key={ct.type}
-              className={`cursor-pointer transition-all hover:border-primary/50 ${
-                contentType === ct.type ? 'border-primary ring-2 ring-primary/20' : ''
-              }`}
-              onClick={() => setContentType(ct.type)}
-            >
-              <CardContent className="pt-6 text-center space-y-3">
-                <ct.icon className="h-10 w-10 mx-auto text-primary" />
-                <div>
-                  <p className="font-medium">{ct.label}</p>
-                  <p className="text-xs text-muted-foreground">{ct.description}</p>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-          <div className="sm:col-span-3 flex justify-end">
-            <Button
-              onClick={() => setStep(2)}
-              disabled={!contentType}
-            >
-              Next <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
+        <>
+          {rules.length === 0 && (
+            <Alert className="border-primary/30 bg-primary/5">
+              <ShieldQuestion className="h-4 w-4 text-primary" />
+              <AlertDescription className="flex items-center justify-between gap-4">
+                <span className="text-sm">
+                  No compliance rules configured yet. Add rules to start checking your content.
+                </span>
+                <Button asChild size="sm" variant="default">
+                  <Link to="/settings/compliance">Add Rules</Link>
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
+          <div className="grid gap-4 sm:grid-cols-3">
+            {contentTypeCards.map((ct) => (
+              <Card
+                key={ct.type}
+                className={`cursor-pointer transition-all hover:border-primary/50 ${
+                  contentType === ct.type ? 'border-primary ring-2 ring-primary/20' : ''
+                }`}
+                onClick={() => setContentType(ct.type)}
+              >
+                <CardContent className="pt-6 text-center space-y-3">
+                  <ct.icon className="h-10 w-10 mx-auto text-primary" />
+                  <div>
+                    <p className="font-medium">{ct.label}</p>
+                    <p className="text-xs text-muted-foreground">{ct.description}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+            <div className="sm:col-span-3 flex justify-end">
+              <Button
+                onClick={() => setStep(2)}
+                disabled={!contentType}
+              >
+                Next <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
           </div>
-        </div>
+        </>
       )}
 
       {/* History - shown on step 1 */}
