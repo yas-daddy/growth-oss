@@ -93,7 +93,7 @@ const App = () => (
               <Route path="/settings/syncs" element={<ProtectedRoute><SyncSettings /></ProtectedRoute>} />
               <Route path="/settings/ai" element={<ProtectedRoute><AISettings /></ProtectedRoute>} />
               <Route path="/settings/auto-responses" element={<ProtectedRoute><AutoResponsesSettings /></ProtectedRoute>} />
-              <Route path="/settings/push-settings" element={<ProtectedRoute><PushSettings /></ProtectedRoute>} />
+              
               <Route path="/settings/cpa" element={<ProtectedRoute><CPASettings /></ProtectedRoute>} />
               <Route path="/settings/rating-weights" element={<ProtectedRoute><RatingWeightsSettings /></ProtectedRoute>} />
               <Route path="/settings/security" element={<ProtectedRoute><SecuritySettings /></ProtectedRoute>} />
