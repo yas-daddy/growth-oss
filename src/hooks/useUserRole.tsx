@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 
-export type AppRole = 'admin' | 'editor' | 'viewer' | 'user' | 'affiliate';
+export type AppRole = 'admin' | 'editor' | 'viewer' | 'user' | 'affiliate' | 'super_admin';
 
 export interface UserRole {
   id: string;
@@ -49,14 +49,13 @@ export function useUserRole() {
     enabled: !!user,
   });
 
-  const role = roles?.[0]?.role || 'viewer';
-  const isAdmin = role === 'admin';
+  const roleList = roles?.map(r => r.role) || [];
+  const isSuperAdmin = roleList.includes('super_admin');
+  const role = isSuperAdmin ? 'super_admin' : (roleList.find(r => r !== 'super_admin') || 'viewer');
+  const isAdmin = isSuperAdmin || role === 'admin';
   const isUser = role === 'user' || role === 'viewer' || role === 'editor';
   const isAffiliate = role === 'affiliate';
   
-  // Admins can do everything
-  // Users can view everything but not change settings or sync
-  // Affiliates can only access their specific partner page
   const canManageSettings = isAdmin;
   const canSyncData = isAdmin;
   const canViewDashboard = isAdmin || isUser;
@@ -68,6 +67,7 @@ export function useUserRole() {
     role,
     roles,
     isAdmin,
+    isSuperAdmin,
     isUser,
     isAffiliate,
     canManageSettings,
@@ -86,7 +86,6 @@ export function useAllUsers() {
   return useQuery({
     queryKey: ['all-users'],
     queryFn: async () => {
-      // Get all profiles with their roles
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select('*')
@@ -106,7 +105,6 @@ export function useAllUsers() {
       
       if (accessError) throw accessError;
 
-      // Merge data
       return profiles.map(profile => {
         const userRoles = roles.filter(r => r.user_id === profile.user_id);
         const userAffiliates = affiliateAccess.filter(a => a.user_id === profile.user_id);
