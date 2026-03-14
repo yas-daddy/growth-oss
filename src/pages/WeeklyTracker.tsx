@@ -249,6 +249,7 @@ export default function WeeklyTracker() {
 
   return (
     <div className="space-y-4 md:space-y-6 animate-fade-in">
+      <ConnectProvidersAlert />
       <div className="flex flex-col gap-3 md:gap-4">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <p className="text-sm md:text-base text-muted-foreground">

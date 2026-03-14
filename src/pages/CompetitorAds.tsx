@@ -209,6 +209,7 @@ export default function CompetitorAds() {
 
   return (
     <div className="space-y-6">
+      <ConnectProvidersAlert />
       <div>
         <h1 className="text-2xl font-bold">Competitor Ad Library</h1>
         <p className="text-muted-foreground">Search the Meta Ad Library for competitor ads and save the ones you like.</p>

@@ -266,6 +266,7 @@ export default function KeywordAnalysis() {
       </Helmet>
 
       <div className="space-y-6">
+        <ConnectProvidersAlert />
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <p className="text-muted-foreground text-sm">
