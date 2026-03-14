@@ -133,13 +133,8 @@ export default function Settings() {
           title="Auto-Response Rules"
           description="Automated review response settings"
         />
-        <SettingsRow
-          to="/settings/push-settings"
-          icon={<Bell className="h-4 w-4 text-white" />}
-          iconBg="bg-orange-500"
-          title="Push Notifications"
-          description="Braze configuration and AI copy prompt"
-        />
+
+
         <SettingsRow
           to="/settings/compliance"
           icon={<ShieldCheck className="h-4 w-4 text-white" />}
