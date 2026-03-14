@@ -129,9 +129,13 @@ export function useReport(slug: string, options: UseReportOptions) {
       let previousValue = 0;
 
       if (prevStartDate && prevEndDate) {
-        const prevParams = usesPrefixedParams
+        const prevParams: Record<string, any> = usesPrefixedParams
           ? { p_start_date: prevStartDate, p_end_date: prevEndDate }
           : { start_date: prevStartDate, end_date: prevEndDate };
+
+        if (definition.config?.eventName && usesPrefixedParams) {
+          prevParams.p_event_name = definition.config.eventName;
+        }
 
         const { data: prevData, error: prevError } = await (supabase.rpc as any)(
           definition.data_source,
