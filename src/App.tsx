@@ -64,7 +64,8 @@ const App = () => (
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/onboarding" element={<Onboarding />} />
-                <Route path="/" element={<Index />} />
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/app" element={<Index />} />
                 <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
                 
                 {/* All dashboards use the unified DashboardPage */}
