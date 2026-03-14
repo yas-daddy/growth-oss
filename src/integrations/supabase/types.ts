@@ -1624,6 +1624,7 @@ export type Database = {
           id: string
           is_deletable: boolean | null
           name: string | null
+          org_id: string | null
           report_slugs: string[]
           updated_at: string
         }
@@ -1636,6 +1637,7 @@ export type Database = {
           id?: string
           is_deletable?: boolean | null
           name?: string | null
+          org_id?: string | null
           report_slugs?: string[]
           updated_at?: string
         }
@@ -1648,10 +1650,19 @@ export type Database = {
           id?: string
           is_deletable?: boolean | null
           name?: string | null
+          org_id?: string | null
           report_slugs?: string[]
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "dashboard_configs_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       funnel_metric_alerts: {
         Row: {
@@ -2512,6 +2523,7 @@ export type Database = {
           description: string | null
           id: string
           name: string
+          org_id: string | null
           report_type: string
           slug: string
           updated_at: string
@@ -2524,6 +2536,7 @@ export type Database = {
           description?: string | null
           id?: string
           name: string
+          org_id?: string | null
           report_type: string
           slug: string
           updated_at?: string
@@ -2536,11 +2549,20 @@ export type Database = {
           description?: string | null
           id?: string
           name?: string
+          org_id?: string | null
           report_type?: string
           slug?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "report_definitions_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       review_settings: {
         Row: {
@@ -3080,6 +3102,60 @@ export type Database = {
         Args: { end_date: string; start_date: string }
         Returns: {
           previous_value: number
+          value: number
+        }[]
+      }
+      get_report_blended_cpa_generic: {
+        Args: {
+          p_end_date: string
+          p_event_name?: string
+          p_start_date: string
+        }
+        Returns: {
+          value: number
+        }[]
+      }
+      get_report_conversions: {
+        Args: {
+          p_end_date: string
+          p_event_name?: string
+          p_start_date: string
+        }
+        Returns: {
+          value: number
+        }[]
+      }
+      get_report_conversions_by_channel: {
+        Args: {
+          p_end_date: string
+          p_event_name?: string
+          p_start_date: string
+        }
+        Returns: {
+          channel: string
+          channel_type: string
+          value: number
+        }[]
+      }
+      get_report_cpa_by_channel_generic: {
+        Args: {
+          p_end_date: string
+          p_event_name?: string
+          p_start_date: string
+        }
+        Returns: {
+          channel: string
+          channel_type: string
+          value: number
+        }[]
+      }
+      get_report_cpa_excl_affiliates_generic: {
+        Args: {
+          p_end_date: string
+          p_event_name?: string
+          p_start_date: string
+        }
+        Returns: {
           value: number
         }[]
       }

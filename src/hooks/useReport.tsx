@@ -69,14 +69,23 @@ export function useReport(slug: string, options: UseReportOptions) {
       }
 
       // Call the RPC function for current period
-      // Only the weekly CPA function uses p_ prefixed parameter names
-      // All other functions (including cached ones) use non-prefixed names
+      // Determine parameter naming convention
       const usesPrefixedParams = 
         definition.data_source === 'get_report_cpa_per_channel_weekly' ||
-        definition.data_source === 'get_report_avg_deposit_per_ftd_cached';
-      const currentParams = usesPrefixedParams
+        definition.data_source === 'get_report_avg_deposit_per_ftd_cached' ||
+        definition.data_source.startsWith('get_report_conversions') ||
+        definition.data_source.startsWith('get_report_blended_cpa_generic') ||
+        definition.data_source.startsWith('get_report_cpa_excl_affiliates_generic') ||
+        definition.data_source.startsWith('get_report_cpa_by_channel_generic');
+
+      const currentParams: Record<string, any> = usesPrefixedParams
         ? { p_start_date: startDate, p_end_date: endDate }
         : { start_date: startDate, end_date: endDate };
+
+      // Pass event name for generic conversion-event-aware functions
+      if (definition.config?.eventName && usesPrefixedParams) {
+        currentParams.p_event_name = definition.config.eventName;
+      }
 
       const { data: currentData, error: currentError } = await (supabase.rpc as any)(
         definition.data_source,
@@ -120,9 +129,13 @@ export function useReport(slug: string, options: UseReportOptions) {
       let previousValue = 0;
 
       if (prevStartDate && prevEndDate) {
-        const prevParams = usesPrefixedParams
+        const prevParams: Record<string, any> = usesPrefixedParams
           ? { p_start_date: prevStartDate, p_end_date: prevEndDate }
           : { start_date: prevStartDate, end_date: prevEndDate };
+
+        if (definition.config?.eventName && usesPrefixedParams) {
+          prevParams.p_event_name = definition.config.eventName;
+        }
 
         const { data: prevData, error: prevError } = await (supabase.rpc as any)(
           definition.data_source,

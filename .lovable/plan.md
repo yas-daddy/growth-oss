@@ -49,9 +49,20 @@ Completed:
 - CSV export also driven by the same metric definitions
 - Orgs can customize visible metrics and labels via `tracker_metric_config` table
 
-### Phase 6: Rework Dashboard Report Functions
-- Generic conversion-event-based report functions
-- org_id on report_definitions and dashboard_configs
+### Phase 6: Rework Dashboard Report Functions ✅ DONE
+- Added org_id (FK to organizations) to report_definitions and dashboard_configs
+- Added unique constraints: (org_id, slug) and (org_id, dashboard_slug)
+- Replaced admin-only RLS with org-scoped policies (is_org_admin for writes, is_org_member for reads)
+- Created generic conversion-event-aware RPC functions:
+  - get_report_conversions(p_start_date, p_end_date, p_event_name)
+  - get_report_blended_cpa_generic(p_start_date, p_end_date, p_event_name)
+  - get_report_cpa_excl_affiliates_generic(p_start_date, p_end_date, p_event_name)
+  - get_report_conversions_by_channel(p_start_date, p_end_date, p_event_name)
+  - get_report_cpa_by_channel_generic(p_start_date, p_end_date, p_event_name)
+- Updated useDashboardConfig to filter by org_id, pass org_id on create
+- Updated useReportDefinitions to filter by org_id
+- Updated useReport to pass eventName from config to generic RPC functions
+- ReportConfig now supports eventName override for conversion-event-aware functions
 
 ### Phase 7: Update Edge Functions for Per-Tenant Credentials
 
