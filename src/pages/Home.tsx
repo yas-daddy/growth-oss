@@ -396,12 +396,6 @@ function useYesterdayCPA() {
         ftds: 0,
         cpa: null
       };
-      
-      return {
-        spend: totalSpend,
-        ftds: totalFTDs,
-        cpa: totalFTDs > 0 ? totalSpend / totalFTDs : null
-      };
     }
   });
 }
