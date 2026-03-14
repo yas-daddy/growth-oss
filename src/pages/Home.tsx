@@ -387,13 +387,15 @@ function useYesterdayCPA() {
     queryFn: async () => {
       const yesterday = format(subDays(new Date(), 1), 'yyyy-MM-dd');
       
-      const [spendResult, funnelResult] = await Promise.all([
-        supabase.from('daily_ad_spend').select('spend').eq('date', yesterday),
-        supabase.from('daily_funnel_metrics').select('unique_ftds').eq('date', yesterday)
-      ]);
+      const spendResult = await supabase.from('daily_ad_spend').select('spend').eq('date', yesterday);
 
       const totalSpend = spendResult.data?.reduce((sum, r) => sum + Number(r.spend || 0), 0) || 0;
-      const totalFTDs = funnelResult.data?.reduce((sum, r) => sum + (r.unique_ftds || 0), 0) || 0;
+      
+      return {
+        spend: totalSpend,
+        ftds: 0,
+        cpa: null
+      };
       
       return {
         spend: totalSpend,
