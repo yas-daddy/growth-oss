@@ -21,7 +21,7 @@ import AISettings from "./pages/settings/AISettings";
 import AutoResponsesSettings from "./pages/settings/AutoResponsesSettings";
 
 import CPASettings from "./pages/settings/CPASettings";
-import RatingWeightsSettings from "./pages/settings/RatingWeightsSettings";
+
 import SecuritySettings from "./pages/settings/SecuritySettings";
 import AppearanceSettings from "./pages/settings/AppearanceSettings";
 import Projections from "./pages/Projections";
