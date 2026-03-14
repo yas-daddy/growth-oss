@@ -16,10 +16,13 @@ Completed:
 
 ## Remaining Phases
 
-### Phase 1: Multi-Tenant Data Model
-- Create tables: organizations, organization_members, provider_connections, conversion_events, tracker_metric_config
-- Add org_id to existing data tables
-- RLS policies scoped by org membership
+### Phase 1: Multi-Tenant Data Model ✅ DONE
+- Created tables: organizations, organization_members, provider_connections, conversion_events, tracker_metric_config
+- Created enums: org_role, provider_type, auth_method, connection_status
+- Created security definer functions: is_org_member, is_org_admin, get_user_org_ids
+- RLS policies scoped by org membership on all new tables
+- Added onboarding_completed to profiles
+- Note: org_id on existing data tables deferred to Phase 6 (when report functions are reworked)
 
 ### Phase 2: Organization Context + Onboarding
 - useOrganization React context
