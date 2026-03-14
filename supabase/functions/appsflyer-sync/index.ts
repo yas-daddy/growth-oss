@@ -637,6 +637,7 @@ Deno.serve(async (req) => {
     
     console.log('Sync complete. Totals:', totals);
     
+    await updateLastSyncedAt(orgId, 'appsflyer');
     await completeSyncLog(syncLog?.id || null, true);
     
     return new Response(JSON.stringify({
