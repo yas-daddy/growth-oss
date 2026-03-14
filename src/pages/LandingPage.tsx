@@ -101,6 +101,9 @@ export default function LandingPage() {
             <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 font-semibold uppercase tracking-wider border-primary/40 text-primary">Beta</Badge>
           </Link>
           <div className="flex items-center gap-3">
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/docs">Docs</Link>
+            </Button>
             {user ? (
               <Button asChild size="sm">
                 <Link to="/home">Go to Dashboard <ArrowRight className="ml-1 h-4 w-4" /></Link>
@@ -263,7 +266,10 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="border-t border-border py-8">
         <div className="mx-auto max-w-6xl px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-          <span className="font-semibold gradient-text">GrowthOS</span>
+          <div className="flex items-center gap-4">
+            <span className="font-semibold gradient-text">GrowthOS</span>
+            <Link to="/docs" className="hover:text-foreground transition-colors">Docs</Link>
+          </div>
           <span>© {new Date().getFullYear()} GrowthOS. All rights reserved.</span>
         </div>
       </footer>

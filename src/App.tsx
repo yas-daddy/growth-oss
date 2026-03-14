@@ -8,6 +8,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { OrganizationProvider } from "@/hooks/useOrganization";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import LandingPage from "./pages/LandingPage";
+import Docs from "./pages/Docs";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
@@ -68,6 +69,8 @@ const App = () => (
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/onboarding" element={<Onboarding />} />
                 <Route path="/" element={<LandingPage />} />
+                <Route path="/docs" element={<Docs />} />
+                <Route path="/docs/:slug" element={<Docs />} />
                 <Route path="/app" element={<Index />} />
                 <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
                 
