@@ -12,6 +12,7 @@ import { useDailyAffiliateSpend } from '@/hooks/useDailyAffiliateSpend';
 import { useAffiliates } from '@/hooks/useAffiliates';
 import { usePlatformBudgets } from '@/hooks/usePlatformBudgets';
 import { useMixpanelDeposits } from '@/hooks/useMixpanel';
+import { useConversionEvents } from '@/hooks/useConversionEvents';
 import { format, startOfMonth, endOfMonth, differenceInDays } from 'date-fns';
 
 const PLATFORM_NAMES: Record<string, string> = {
@@ -27,6 +28,11 @@ export default function Projections() {
   const daysInMonth = differenceInDays(monthEnd, monthStart) + 1;
   const daysPassed = differenceInDays(today, monthStart) + 1;
   const daysRemaining = daysInMonth - daysPassed;
+
+  // Get primary conversion event label
+  const { data: conversionEvents } = useConversionEvents();
+  const primaryEvent = conversionEvents?.find(e => e.is_primary);
+  const conversionLabel = primaryEvent?.event_label || 'Conversions';
 
   // Get current month spend data
   const startDateStr = format(monthStart, 'yyyy-MM-dd');
@@ -50,7 +56,6 @@ export default function Projections() {
     
     return Array.from(byPlatform.entries())
       .map(([platform, spend]) => {
-        // Find budget for this platform
         const budgetInfo = platformBudgets.find(b => b.platform === platform);
         const dailyBudget = budgetInfo?.totalDailyBudget || 0;
         const lifetimeBudget = budgetInfo?.totalLifetimeBudget || 0;
@@ -98,18 +103,17 @@ export default function Projections() {
   const totalAffiliateRemaining = affiliateProjections.reduce((sum, a) => sum + a.remaining, 0);
   const totalCurrentSpend = totalAdSpend + totalAffiliateSpent;
 
-  // Calculate current MTD FTDs (from ad installs + affiliate FTDs)
+  // Calculate current MTD conversions (from ad installs + affiliate FTDs)
   const mtdAdInstalls = dailySpend?.reduce((sum, d) => sum + d.installs, 0) || 0;
   const mtdAffiliateFTDs = affiliateSpend?.reduce((sum, d) => sum + d.ftds, 0) || 0;
-  const currentMTDFTDs = mtdAdInstalls + mtdAffiliateFTDs;
+  const currentMTDConversions = mtdAdInstalls + mtdAffiliateFTDs;
 
   // Calculate average CPA
-  const averageCPA = currentMTDFTDs > 0 ? totalCurrentSpend / currentMTDFTDs : 0;
+  const averageCPA = currentMTDConversions > 0 ? totalCurrentSpend / currentMTDConversions : 0;
 
-  // Calculate net deposits per FTD from deposit events (filtered to current month)
+  // Calculate net deposits per conversion from deposit events (filtered to current month)
   const mtdNetDeposits = depositsData?.totalAmount || 0;
-
-  const netDepositsPerFTD = currentMTDFTDs > 0 ? mtdNetDeposits / currentMTDFTDs : 0;
+  const netDepositsPerConversion = currentMTDConversions > 0 ? mtdNetDeposits / currentMTDConversions : 0;
 
   // Calculate yesterday's spend by platform for velocity-based projections
   const yesterdaySpendByPlatform = useMemo(() => {
@@ -135,16 +139,12 @@ export default function Projections() {
       const yesterdaySpend = yesterdaySpendByPlatform.get(platform.platform) || 0;
       
       if (yesterdaySpend > 0) {
-        // Primary: Use yesterday's spend as daily velocity
         projected += platform.spend + (yesterdaySpend * daysRemaining);
       } else if (platform.dailyBudget > 0) {
-        // Fallback: Use daily budget for projection
         projected += platform.dailyBudget * daysInMonth;
       } else if (platform.lifetimeBudget > 0) {
-        // Fallback: Use lifetime budget
         projected += Math.min(platform.lifetimeBudget, platform.spend + (platform.lifetimeBudget - platform.spend));
       } else {
-        // Final fallback: Use daily average projection
         const dailyAvg = daysPassed > 0 ? platform.spend / daysPassed : 0;
         projected += dailyAvg * daysInMonth;
       }
@@ -159,12 +159,12 @@ export default function Projections() {
   // Calculate remaining spend (projected - current)
   const remainingSpend = Math.max(0, projectedTotalSpend - totalCurrentSpend);
 
-  // Projected FTDs by EOM = current MTD FTDs + (remaining spend / Average CPA)
-  const additionalFTDs = averageCPA > 0 ? remainingSpend / averageCPA : 0;
-  const projectedFTDsByEOM = Math.round(currentMTDFTDs + additionalFTDs);
+  // Projected conversions by EOM = current MTD conversions + (remaining spend / Average CPA)
+  const additionalConversions = averageCPA > 0 ? remainingSpend / averageCPA : 0;
+  const projectedConversionsByEOM = Math.round(currentMTDConversions + additionalConversions);
 
-  // Projected Net Deposits by EOM = total FTDs by EOM × net deposits per FTD × (30 / current days elapsed)
-  const projectedNetDeposits = projectedFTDsByEOM * netDepositsPerFTD * (30 / daysPassed);
+  // Projected Net Deposits by EOM = total conversions by EOM × net deposits per conversion × (30 / current days elapsed)
+  const projectedNetDeposits = projectedConversionsByEOM * netDepositsPerConversion * (30 / daysPassed);
 
   return (
     <div className="space-y-6">
@@ -198,16 +198,16 @@ export default function Projections() {
           variant="accent"
         />
         <KPICard
-          title="Projected FTDs by EOM"
-          value={projectedFTDsByEOM.toLocaleString()}
+          title={`Projected ${conversionLabel} by EOM`}
+          value={projectedConversionsByEOM.toLocaleString()}
           icon={<Users className="h-5 w-5" />}
-          subtitle={`Current: ${currentMTDFTDs.toLocaleString()} | Avg CPA: £${Math.round(averageCPA)}`}
+          subtitle={`Current: ${currentMTDConversions.toLocaleString()} | Avg CPA: £${Math.round(averageCPA)}`}
         />
         <KPICard
           title="Projected Net Deposits"
           value={`£${Math.round(projectedNetDeposits).toLocaleString()}`}
           icon={<TrendingUp className="h-5 w-5" />}
-          subtitle={`£${Math.round(netDepositsPerFTD)} per FTD`}
+          subtitle={`£${Math.round(netDepositsPerConversion)} per ${conversionLabel.toLowerCase()}`}
         />
       </div>
 
@@ -270,7 +270,6 @@ export default function Projections() {
                   const yesterdaySpend = yesterdaySpendByPlatform.get(platform.platform) || 0;
                   
                   if (yesterdaySpend > 0) {
-                    // Primary: Use yesterday's spend as daily velocity
                     projected = platform.spend + (yesterdaySpend * daysRemaining);
                     projectionSource = 'yesterday';
                   } else if (platform.dailyBudget > 0) {
