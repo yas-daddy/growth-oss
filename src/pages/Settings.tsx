@@ -169,13 +169,8 @@ export default function Settings() {
           title="CPA Targets"
           description="CPA thermometer thresholds"
         />
-        <SettingsRow
-          to="/settings/rating-weights"
-          icon={<Scale className="h-4 w-4 text-white" />}
-          iconBg="bg-indigo-500"
-          title="Rating Weights"
-          description="Channel contribution to overall rating"
-        />
+
+
       </SettingsSection>
 
       {/* Access */}
