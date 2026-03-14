@@ -24,10 +24,12 @@ Completed:
 - Added onboarding_completed to profiles
 - Note: org_id on existing data tables deferred to Phase 6 (when report functions are reworked)
 
-### Phase 2: Organization Context + Onboarding
-- useOrganization React context
-- Post-signup onboarding flow (3 steps)
-- Update all data hooks to filter by org_id
+### Phase 2: Organization Context + Onboarding ✅ DONE
+- Created useOrganization React context (resolves user's org from organization_members)
+- Built 3-step onboarding flow: Create Org → Select Providers → Define Conversion Events
+- Updated Index.tsx to redirect to /onboarding if not completed
+- Wrapped App with OrganizationProvider
+- Added /onboarding route to App.tsx
 
 ### Phase 3: Provider Connections Settings Page
 - Partners page with OAuth (Meta) and API key inputs
