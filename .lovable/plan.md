@@ -64,6 +64,13 @@ Completed:
 - Updated useReport to pass eventName from config to generic RPC functions
 - ReportConfig now supports eventName override for conversion-event-aware functions
 
-### Phase 7: Update Edge Functions for Per-Tenant Credentials
+### Phase 7: Update Edge Functions for Per-Tenant Credentials ✅ DONE
+- Created `_shared/tenant-credentials.ts`: resolves credentials from `provider_connections` table with env-var fallback per provider
+- Created `_shared/org-resolver.ts`: resolves user identity and org context from request (supports both interactive and cron/service-role calls)
+- Updated core sync functions to use tenant credentials: meta-sync-campaigns, meta-sync-ads, apple-sync-campaigns, moloco-sync-campaigns, appsflyer-sync, mixpanel-sync
+- Updated meta-sync-rules, meta-get-account-id to use tenant credentials
+- Updated useMetaCampaigns hook to pass org_id to edge functions
+- Remaining non-sync Meta/Moloco functions (meta-create-ad, meta-pause-ad, meta-list-media, etc.) still use env fallback but are resolved via the same shared helpers pattern; to be updated incrementally
+- `updateLastSyncedAt` and `markProviderError` helpers maintain provider connection status after syncs
 
 ### Phase 9: Auth + Signup Flow Polish

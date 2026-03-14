@@ -35,6 +35,7 @@ export interface MetaSummary {
 export function useMetaCampaigns() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { organization } = useOrganization();
 
   const campaignsQuery = useQuery({
     queryKey: ['meta-campaigns'],
