@@ -73,6 +73,15 @@ Completed:
 - Remaining non-sync Meta/Moloco functions (meta-create-ad, meta-pause-ad, meta-list-media, etc.) still use env fallback but are resolved via the same shared helpers pattern; to be updated incrementally
 - `updateLastSyncedAt` and `markProviderError` helpers maintain provider connection status after syncs
 
+### Phase 10: Meta OAuth "Connect with Facebook" Flow ✅ DONE
+- Created `meta-oauth-app-id` edge function: returns META_APP_ID for client-side OAuth URL construction
+- Created `meta-oauth-callback` edge function: exchanges auth code for long-lived token (60-day), fetches user's ad accounts and pages
+- Created `meta-oauth-save` edge function: saves selected ad account + token + page to provider_connections via service role
+- Updated ConnectionsSettings: Meta Ads now shows "Connect with Facebook" button that initiates Facebook OAuth flow
+- After OAuth redirect, user selects their ad account (and optionally a Facebook Page) from a dialog
+- Credentials (access_token, ad_account_id, page_id, instagram_actor_id) saved automatically
+- Non-Meta providers still use the manual API key entry flow
+
 ### Phase 9: Auth + Signup Flow Polish ✅ DONE
 - Reworked Auth.tsx: sign-in is default mode; sign-up only available via "Have an invitation?" link (invite-only system)
 - Added invitation deep-link support: `/auth?invite=true&email=...` pre-fills email and opens signup mode
