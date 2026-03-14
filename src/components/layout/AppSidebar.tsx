@@ -28,6 +28,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
+import gosLogo from '@/assets/gos-logo.png';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 
