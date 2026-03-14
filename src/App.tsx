@@ -80,10 +80,8 @@ const App = () => (
               <Route path="/recommendations" element={<ProtectedRoute><Recommendations /></ProtectedRoute>} />
               <Route path="/automation-rules" element={<ProtectedRoute><AutomationRules /></ProtectedRoute>} />
               <Route path="/launch-ads" element={<ProtectedRoute><LaunchAds /></ProtectedRoute>} />
-              <Route path="/football-ads" element={<ProtectedRoute><FootballAds /></ProtectedRoute>} />
-              <Route path="/push-notifications" element={<ProtectedRoute><PushNotifications /></ProtectedRoute>} />
-              <Route path="/email-campaigns" element={<ProtectedRoute><EmailCampaigns /></ProtectedRoute>} />
-              <Route path="/email-campaigns/:campaignId" element={<ProtectedRoute><EmailCampaignDetail /></ProtectedRoute>} />
+
+
               <Route path="/campaign-performance" element={<ProtectedRoute><CampaignPerformance /></ProtectedRoute>} />
               <Route path="/competitor-ads" element={<ProtectedRoute><CompetitorAds /></ProtectedRoute>} />
               <Route path="/compliance" element={<ProtectedRoute><ComplianceChecker /></ProtectedRoute>} />
