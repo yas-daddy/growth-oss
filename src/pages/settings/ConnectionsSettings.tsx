@@ -15,7 +15,7 @@ import { useGooglePlayStats, useSyncGooglePlayReviews } from '@/hooks/useGoogleP
 import { useAppStoreStats, useSyncAppStoreReviews } from '@/hooks/useAppStoreReviews';
 import { useTypeformStats } from '@/hooks/useTypeformSurveys';
 import { useOrganicInstallsStats, useSyncOrganicInstalls, useSearchConsoleStats, useSyncSearchConsole } from '@/hooks/useOrganicInstalls';
-import { useFootballFixtures } from '@/hooks/useFootballFixtures';
+
 import { useUserRole } from '@/hooks/useUserRole';
 import { formatDistanceToNow } from 'date-fns';
 
