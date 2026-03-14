@@ -98,6 +98,7 @@ export default function LandingPage() {
           <Link to="/" className="flex items-center gap-2">
             <img src={gosLogo} alt="GrowthOS" className="h-8 w-8 rounded-lg" />
             <span className="text-xl font-bold gradient-text">GrowthOS</span>
+            <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 font-semibold uppercase tracking-wider border-primary/40 text-primary">Beta</Badge>
           </Link>
           <div className="flex items-center gap-3">
             {user ? (
@@ -124,7 +125,7 @@ export default function LandingPage() {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-primary/10 blur-[120px] pointer-events-none" />
         <div className="relative mx-auto max-w-4xl text-center px-6">
           <Badge variant="secondary" className="mb-6 text-xs font-medium tracking-wide">
-            The all-in-one growth platform
+            🚀 Now in Beta — the all-in-one growth platform
           </Badge>
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold leading-tight tracking-tight mb-6">
             Grow smarter,{' '}

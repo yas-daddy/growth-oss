@@ -183,6 +183,7 @@ export function AppSidebar() {
               <div className="flex flex-col">
                 <div className="flex items-center gap-2">
                   <span className="font-semibold text-sm text-sidebar-foreground">GrowthOS</span>
+                  <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 font-semibold uppercase tracking-wider border-primary/40 text-primary">Beta</Badge>
                 </div>
                 <span className="text-xs text-muted-foreground">Marketing Command Centre</span>
               </div>
