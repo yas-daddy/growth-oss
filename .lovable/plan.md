@@ -31,9 +31,11 @@ Completed:
 - Wrapped App with OrganizationProvider
 - Added /onboarding route to App.tsx
 
-### Phase 3: Provider Connections Settings Page
-- Partners page with OAuth (Meta) and API key inputs
-- Credential storage in provider_connections
+### Phase 3: Provider Connections Settings Page ✅ DONE
+- Created useProviderConnections hook (CRUD for provider_connections table)
+- Rewrote ConnectionsSettings as "Partners" page with per-provider connect/disconnect dialogs
+- 9 providers with field definitions, instructions, and docs links
+- Settings hub updated to show "Partners" instead of "API Connections"
 
 ### Phase 4: Conversion Events Settings
 - Users define conversion events for CPA tracking
