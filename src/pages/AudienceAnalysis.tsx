@@ -111,6 +111,16 @@ export default function AudienceAnalysis() {
 
   return (
     <div className="space-y-6">
+      <ConnectProvidersAlert
+        requiredProvider="meta_ads"
+        message="Connect your Meta Ads account to view audience demographics and insights."
+      />
+
+      {isError && isMetaConnected && (
+        <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
+          Failed to load audience data. Please check your Meta Ads connection or try again later.
+        </div>
+      )}
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
