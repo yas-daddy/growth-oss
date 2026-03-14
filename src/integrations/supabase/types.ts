@@ -3224,6 +3224,7 @@ export type Database = {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
       }
+      is_super_admin: { Args: { _user_id: string }; Returns: boolean }
       populate_daily_funnel_metrics: {
         Args: { end_dt?: string; start_dt?: string }
         Returns: Json
@@ -3238,7 +3239,13 @@ export type Database = {
     }
     Enums: {
       affiliate_status: "active" | "paused" | "inactive"
-      app_role: "admin" | "editor" | "viewer" | "user" | "affiliate"
+      app_role:
+        | "admin"
+        | "editor"
+        | "viewer"
+        | "user"
+        | "affiliate"
+        | "super_admin"
       auth_method: "oauth" | "api_key"
       connection_status: "connected" | "disconnected" | "error"
       org_role: "owner" | "admin" | "member"
@@ -3381,7 +3388,14 @@ export const Constants = {
   public: {
     Enums: {
       affiliate_status: ["active", "paused", "inactive"],
-      app_role: ["admin", "editor", "viewer", "user", "affiliate"],
+      app_role: [
+        "admin",
+        "editor",
+        "viewer",
+        "user",
+        "affiliate",
+        "super_admin",
+      ],
       auth_method: ["oauth", "api_key"],
       connection_status: ["connected", "disconnected", "error"],
       org_role: ["owner", "admin", "member"],

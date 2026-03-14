@@ -42,6 +42,9 @@ import CompetitorAds from "./pages/CompetitorAds";
 import ComplianceChecker from "./pages/ComplianceChecker";
 import ComplianceSettings from "./pages/settings/ComplianceSettings";
 import ConversionEventsSettings from "./pages/settings/ConversionEventsSettings";
+import PlatformManagement from "./pages/settings/PlatformManagement";
+import GlobalAPIKeys from "./pages/settings/GlobalAPIKeys";
+import OrganizationsSettings from "./pages/settings/OrganizationsSettings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -106,6 +109,9 @@ const App = () => (
                 <Route path="/settings/affiliates" element={<ProtectedRoute><AffiliateSettings /></ProtectedRoute>} />
                 <Route path="/settings/affiliates/:id" element={<ProtectedRoute><AffiliateDetail /></ProtectedRoute>} />
                 <Route path="/settings/users" element={<ProtectedRoute><UserManagement /></ProtectedRoute>} />
+                <Route path="/settings/platform-management" element={<ProtectedRoute><PlatformManagement /></ProtectedRoute>} />
+                <Route path="/settings/global-api-keys" element={<ProtectedRoute><GlobalAPIKeys /></ProtectedRoute>} />
+                <Route path="/settings/organizations" element={<ProtectedRoute><OrganizationsSettings /></ProtectedRoute>} />
                 
                 <Route path="*" element={<NotFound />} />
               </Routes>
