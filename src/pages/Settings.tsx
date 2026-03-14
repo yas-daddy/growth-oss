@@ -2,9 +2,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useOrganization } from '@/hooks/useOrganization';
 import { 
   Shield, Database, ChevronRight, Megaphone, Users, Palette, 
-  RefreshCw, Sparkles, Lock, MessageSquare, ShieldCheck, Gauge, Target
+  RefreshCw, Sparkles, Lock, MessageSquare, ShieldCheck, Gauge, Target,
+  Building2, Key, Image
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -49,7 +51,10 @@ function SettingsSection({ label, children }: { label: string; children: React.R
 
 export default function Settings() {
   const { user } = useAuth();
-  const { role, isLoading: roleLoading } = useUserRole();
+  const { role, isSuperAdmin, isLoading: roleLoading } = useUserRole();
+  const { isOrgAdmin } = useOrganization();
+
+  const showAdminSections = isOrgAdmin || isSuperAdmin;
 
   return (
     <div className="space-y-6 animate-fade-in max-w-2xl">
@@ -76,11 +81,12 @@ export default function Settings() {
                 <Badge 
                   variant="outline" 
                   className={`mt-1 capitalize text-[10px] ${
+                    isSuperAdmin ? 'bg-destructive/10 text-destructive border-destructive/30' :
                     role === 'admin' ? 'bg-primary/10 text-primary border-primary/30' : 
                     role === 'affiliate' ? 'bg-accent/10 text-accent border-accent/30' : ''
                   }`}
                 >
-                  {role}
+                  {isSuperAdmin ? 'Super Admin' : role}
                 </Badge>
               )}
             </div>
@@ -108,13 +114,15 @@ export default function Settings() {
           title="Partners"
           description="Connect ad platforms, analytics, and review services"
         />
-        <SettingsRow
-          to="/settings/syncs"
-          icon={<RefreshCw className="h-4 w-4 text-white" />}
-          iconBg="bg-teal-500"
-          title="Automated Syncs"
-          description="Scheduled sync jobs and history"
-        />
+        {showAdminSections && (
+          <SettingsRow
+            to="/settings/syncs"
+            icon={<RefreshCw className="h-4 w-4 text-white" />}
+            iconBg="bg-teal-500"
+            title="Automated Syncs"
+            description="Scheduled sync jobs and history"
+          />
+        )}
       </SettingsSection>
 
       {/* AI & Automation */}
@@ -133,8 +141,6 @@ export default function Settings() {
           title="Auto-Response Rules"
           description="Automated review response settings"
         />
-
-
         <SettingsRow
           to="/settings/compliance"
           icon={<ShieldCheck className="h-4 w-4 text-white" />}
@@ -160,8 +166,6 @@ export default function Settings() {
           title="Affiliate Partners"
           description="Manage affiliate partners and links"
         />
-
-
         <SettingsRow
           to="/settings/cpa"
           icon={<Gauge className="h-4 w-4 text-white" />}
@@ -180,13 +184,15 @@ export default function Settings() {
 
       {/* Access */}
       <SettingsSection label="Access">
-        <SettingsRow
-          to="/settings/users"
-          icon={<Shield className="h-4 w-4 text-white" />}
-          iconBg="bg-slate-600"
-          title="Users & Permissions"
-          description="Manage users and access control"
-        />
+        {showAdminSections && (
+          <SettingsRow
+            to="/settings/users"
+            icon={<Shield className="h-4 w-4 text-white" />}
+            iconBg="bg-slate-600"
+            title="Users & Permissions"
+            description="Manage users and access control"
+          />
+        )}
         <SettingsRow
           to="/settings/security"
           icon={<Lock className="h-4 w-4 text-white" />}
@@ -195,6 +201,33 @@ export default function Settings() {
           description="Change password and security settings"
         />
       </SettingsSection>
+
+      {/* Super Admin Only */}
+      {isSuperAdmin && (
+        <SettingsSection label="Super Admin">
+          <SettingsRow
+            to="/settings/platform-management"
+            icon={<Image className="h-4 w-4 text-white" />}
+            iconBg="bg-indigo-600"
+            title="Platform Management"
+            description="Upload icons and manage partner API branding"
+          />
+          <SettingsRow
+            to="/settings/global-api-keys"
+            icon={<Key className="h-4 w-4 text-white" />}
+            iconBg="bg-yellow-600"
+            title="API Keys & OAuth"
+            description="Manage global API credentials and OAuth settings"
+          />
+          <SettingsRow
+            to="/settings/organizations"
+            icon={<Building2 className="h-4 w-4 text-white" />}
+            iconBg="bg-gray-700"
+            title="All Organizations"
+            description="View and manage all organizations"
+          />
+        </SettingsSection>
+      )}
     </div>
   );
 }

@@ -37,7 +37,7 @@ export default function UserManagement() {
   const [targetUser, setTargetUser] = useState<{ id: string; name: string; email: string } | null>(null);
 
   // Redirect non-admins
-  if (!roleLoading && !isAdmin) {
+  if (!roleLoading && !canAccess) {
     navigate('/');
     return null;
   }
