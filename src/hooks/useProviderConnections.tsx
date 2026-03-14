@@ -82,12 +82,12 @@ export function useDisconnectProvider() {
       const { error } = await supabase
         .from('provider_connections')
         .update({
-          status: 'disconnected',
+          status: 'disconnected' as const,
           credentials: {},
           updated_at: new Date().toISOString(),
         })
         .eq('org_id', organization.id)
-        .eq('provider', provider);
+        .eq('provider', provider as any);
 
       if (error) throw error;
     },
