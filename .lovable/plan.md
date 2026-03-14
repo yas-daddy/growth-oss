@@ -1,83 +1,71 @@
 
-# Revised Plan: Multi-Tenant B2B SaaS Revamp
 
-## Phase 8: Cleanup ✅ DONE
+# Fix User Access & Add Super Admin System
 
-Completed:
-- Deleted pages: FootballAds, PushNotifications, EmailCampaigns, EmailCampaignDetail, BrandVisibility, BrandScoreSettings, PushSettings, RatingWeightsSettings
-- Deleted components: football-ads/*, email/*
-- Deleted hooks: useFootballFixtures, useFootballTeams, useFootballTeamScores, useGeneratedAds, usePushNotifications, useEmailCampaigns, useBrandScore, useBrandScoreHistory, useBrandScoreExplanations, useNPSMetrics, useBettingUsers, useChannelWeights, useFunnelData, useUserIdentityMap, useReferralSignups, useAdTemplates
-- Deleted edge functions: generate-football-ad, fetch-football-fixtures, fetch-betting-odds, schedule-match-push, cancel-match-push, generate-push-copy, schedule-email-broadcast, cancel-email-broadcast, generate-email-copy, calculate-brand-scores, calculate-nps-metrics, populate-funnel-metrics, populate-revenue-metrics, populate-user-ftd-dates
-- Dropped tables: football_fixtures, football_teams, football_team_scores, generated_football_ads, push_notification_schedules, email_campaign_schedules, email_campaign_settings, weekly_brand_scores, daily_nps_metrics, daily_revenue_metrics, daily_funnel_metrics, user_ftd_dates, user_identity_map, range_metrics_cache, channel_weights, brand_score_explanations
-- Dropped 30+ betting-specific DB functions
-- Updated App.tsx routes, AppSidebar nav, Settings page, usePageVisitTracker, useSyncFunctionLogs
-- Removed Stakemate logo/branding, removed Beta badge
-- Cast remaining RPC calls to `any` for type safety until generic replacements are built
+## Root Cause
+1. The `handle_new_user` trigger function exists but the **trigger itself was never created**, so no profile or role gets assigned on signup
+2. The `user_roles` RLS policy requires admin to insert — chicken-and-egg problem for new org creators
+3. No super admin concept exists yet
 
-## Remaining Phases
+## Plan
 
-### Phase 1: Multi-Tenant Data Model ✅ DONE
-- Created tables: organizations, organization_members, provider_connections, conversion_events, tracker_metric_config
-- Created enums: org_role, provider_type, auth_method, connection_status
-- Created security definer functions: is_org_member, is_org_admin, get_user_org_ids
-- RLS policies scoped by org membership on all new tables
-- Added onboarding_completed to profiles
-- Note: org_id on existing data tables deferred to Phase 6 (when report functions are reworked)
+### 1. Database Migrations
 
-### Phase 2: Organization Context + Onboarding ✅ DONE
-- Created useOrganization React context (resolves user's org from organization_members)
-- Built 3-step onboarding flow: Create Org → Select Providers → Define Conversion Events
-- Updated Index.tsx to redirect to /onboarding if not completed
-- Wrapped App with OrganizationProvider
-- Added /onboarding route to App.tsx
+**a) Create missing triggers on auth.users:**
+- `on_auth_user_created` → calls `handle_new_user()` (creates profile, assigns role from invitation)
+- `on_auth_user_login` → calls `handle_user_login()` (updates last_login_at)
 
-### Phase 3: Provider Connections Settings Page ✅ DONE
-- Created useProviderConnections hook (CRUD for provider_connections table)
-- Rewrote ConnectionsSettings as "Partners" page with per-provider connect/disconnect dialogs
-- 9 providers with field definitions, instructions, and docs links
-- Settings hub updated to show "Partners" instead of "API Connections"
+**b) Add `super_admin` to the `app_role` enum:**
+- `ALTER TYPE app_role ADD VALUE 'super_admin';`
 
-### Phase 4: Conversion Events Settings ✅ DONE
-- Created useConversionEvents hook (CRUD with primary event management)
-- Built ConversionEventsSettings page with create/edit/delete/set-primary
-- Added route and Settings hub entry
+**c) Add `is_super_admin()` security definer function:**
+- Checks if user has `super_admin` role in `user_roles`
 
-### Phase 5: Rework Weekly/Monthly Tracker ✅ DONE
-- Created shared `src/lib/trackerMetricDefinitions.ts` with data-driven metric definitions (key, label, section, format, getValue, invertColors)
-- Created `src/hooks/useTrackerMetricConfig.tsx` hook to fetch org-specific `tracker_metric_config` rows, with fallback to defaults
-- Refactored WeeklyTracker and MonthlyTracker to render table rows dynamically from metric definitions
-- CSV export also driven by the same metric definitions
-- Orgs can customize visible metrics and labels via `tracker_metric_config` table
+**d) Fix `user_roles` RLS to allow org owners to self-assign:**
+- Add policy: users can insert their own role if they are an org owner (using `is_org_admin` function) OR if they are super_admin
+- This fixes the onboarding chicken-and-egg problem
 
-### Phase 6: Rework Dashboard Report Functions ✅ DONE
-- Added org_id (FK to organizations) to report_definitions and dashboard_configs
-- Added unique constraints: (org_id, slug) and (org_id, dashboard_slug)
-- Replaced admin-only RLS with org-scoped policies (is_org_admin for writes, is_org_member for reads)
-- Created generic conversion-event-aware RPC functions:
-  - get_report_conversions(p_start_date, p_end_date, p_event_name)
-  - get_report_blended_cpa_generic(p_start_date, p_end_date, p_event_name)
-  - get_report_cpa_excl_affiliates_generic(p_start_date, p_end_date, p_event_name)
-  - get_report_conversions_by_channel(p_start_date, p_end_date, p_event_name)
-  - get_report_cpa_by_channel_generic(p_start_date, p_end_date, p_event_name)
-- Updated useDashboardConfig to filter by org_id, pass org_id on create
-- Updated useReportDefinitions to filter by org_id
-- Updated useReport to pass eventName from config to generic RPC functions
-- ReportConfig now supports eventName override for conversion-event-aware functions
+**e) Seed your current user** with a profile, org, org membership, and `super_admin` + `admin` roles (via service-role insert)
 
-### Phase 7: Update Edge Functions for Per-Tenant Credentials ✅ DONE
-- Created `_shared/tenant-credentials.ts`: resolves credentials from `provider_connections` table with env-var fallback per provider
-- Created `_shared/org-resolver.ts`: resolves user identity and org context from request (supports both interactive and cron/service-role calls)
-- Updated core sync functions to use tenant credentials: meta-sync-campaigns, meta-sync-ads, apple-sync-campaigns, moloco-sync-campaigns, appsflyer-sync, mixpanel-sync
-- Updated meta-sync-rules, meta-get-account-id to use tenant credentials
-- Updated useMetaCampaigns hook to pass org_id to edge functions
-- Remaining non-sync Meta/Moloco functions (meta-create-ad, meta-pause-ad, meta-list-media, etc.) still use env fallback but are resolved via the same shared helpers pattern; to be updated incrementally
-- `updateLastSyncedAt` and `markProviderError` helpers maintain provider connection status after syncs
+### 2. Update `useUserRole` Hook
+- Add `isSuperAdmin` derived from roles containing `super_admin`
+- Super admins bypass all permission checks
 
-### Phase 9: Auth + Signup Flow Polish ✅ DONE
-- Reworked Auth.tsx: sign-in is default mode; sign-up only available via "Have an invitation?" link (invite-only system)
-- Added invitation deep-link support: `/auth?invite=true&email=...` pre-fills email and opens signup mode
-- Added forgot password flow with `resetPasswordForEmail` redirecting to `/reset-password`
-- Created ResetPassword.tsx page: handles PASSWORD_RECOVERY event, password update with confirmation
-- Graceful error handling for "Signup not allowed" trigger rejection (shows "Invitation Required" message)
-- Updated send-invite-email edge function: signup URL now includes `?invite=true&email=` params; rebranded from Stakemate to GrowthOS
-- Added `/reset-password` route to App.tsx
+### 3. Update `useOrganization` Hook / Context
+- For super admins: fetch ALL organizations, allow switching between them
+- Store selected org in state (localStorage for persistence)
+- Add `switchOrganization(orgId)` method to context
+
+### 4. Org Selector in Sidebar Header
+- Only visible to super admins
+- Dropdown showing all organizations
+- Selecting switches the active org context
+
+### 5. Update Settings Page
+- Show "Users & Permissions" to org admins (not just `user_roles` admins) — use `isOrgAdmin` from org context
+- Add new "Super Admin" section (only for super admins) with:
+  - **Platform Management** — upload icons for partner APIs, manage CMS content
+  - **API Keys & OAuth** — manage global secrets/credentials
+  - **All Organizations** — view/manage all orgs
+
+### 6. Update `UserManagement.tsx`
+- Allow access for org admins (not just `user_roles` admin check)
+- Scope user list to current organization's members
+
+### 7. Create Super Admin Settings Pages
+- `src/pages/settings/PlatformManagement.tsx` — upload/manage partner API icons
+- `src/pages/settings/GlobalAPIKeys.tsx` — manage OAuth and API key configurations
+- Add routes in `App.tsx`
+
+### Files to Create/Edit
+- **DB Migration**: Create triggers, add super_admin role, fix RLS
+- **DB Insert**: Seed your user profile + roles + org
+- **Edit**: `src/hooks/useUserRole.tsx` — add `isSuperAdmin`
+- **Edit**: `src/hooks/useOrganization.tsx` — add org switching for super admins
+- **Edit**: `src/components/layout/AppSidebar.tsx` — add org selector
+- **Edit**: `src/pages/Settings.tsx` — conditionally show admin/super-admin sections
+- **Edit**: `src/pages/UserManagement.tsx` — use org-based admin check
+- **Create**: `src/pages/settings/PlatformManagement.tsx`
+- **Create**: `src/pages/settings/GlobalAPIKeys.tsx`
+- **Edit**: `src/App.tsx` — add new routes
+
