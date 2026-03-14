@@ -2,6 +2,8 @@ import { useState, useMemo } from 'react';
 import { format, subDays } from 'date-fns';
 import { RefreshCw, Users, Target } from 'lucide-react';
 import { useMetaDemographics } from '@/hooks/useMetaDemographics';
+import { useProviderConnections } from '@/hooks/useProviderConnections';
+import { ConnectProvidersAlert } from '@/components/ConnectProvidersAlert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
