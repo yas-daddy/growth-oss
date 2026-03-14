@@ -557,7 +557,7 @@ Deno.serve(async (req) => {
       syncedAt: new Date().toISOString(),
     };
 
-    console.log('Sync completed:', result);
+    await updateLastSyncedAt(orgId, 'moloco');
     await completeSyncLog(syncLog?.id || null, true);
 
     return new Response(
