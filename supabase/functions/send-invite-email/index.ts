@@ -54,7 +54,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log(`Sending invite email to ${email} for role ${role}`);
 
     const appUrl = req.headers.get("origin") || "https://app.example.com";
-    const signupUrl = `${appUrl}/auth`;
+    const signupUrl = `${appUrl}/auth?invite=true&email=${encodeURIComponent(email)}`;
 
     const roleDescription = role === "affiliate" && affiliateName
       ? `${role} partner for ${affiliateName}`
