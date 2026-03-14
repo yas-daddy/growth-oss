@@ -29,6 +29,7 @@ import { useUserPreference } from '@/hooks/useUserPreferences';
 import { useComplianceRules } from '@/hooks/useComplianceRules';
 import { useMediaComplianceCheck } from '@/hooks/useMediaComplianceCheck';
 import { MediaComplianceDialog } from '@/components/ads/MediaComplianceDialog';
+import { ConnectProvidersAlert } from '@/components/ConnectProvidersAlert';
 
 function existingPostAdName(caption?: string, id?: string): string {
   if (!caption) return `Post_${(id || '').slice(-8)}`;
