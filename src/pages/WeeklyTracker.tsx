@@ -622,326 +622,39 @@ export default function WeeklyTracker() {
                       </TableRow>
                     </TableHeader>
                 <TableBody>
-                  {/* Funnel Metrics */}
-                  <TableRow className="bg-muted/30">
-                    <TableCell className="sticky left-0 bg-muted/30 font-medium" colSpan={metrics.length + 1}>
-                      Funnel Metrics
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="sticky left-0 bg-background">Total Installs</TableCell>
-                    {metrics.slice(0, 8).map((m, idx) => (
-                      <TableCell key={m.week_start} className="text-center">
-                        <MetricCell 
-                          value={m.total_installs} 
-                          formatted={formatNumber(m.total_installs)} 
-                          change={getWoWChange(metrics, idx, x => x.total_installs)} 
-                        />
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="sticky left-0 bg-background">Total Signups</TableCell>
-                    {metrics.slice(0, 8).map((m, idx) => (
-                      <TableCell key={m.week_start} className="text-center">
-                        <MetricCell 
-                          value={m.total_signups} 
-                          formatted={formatNumber(m.total_signups)} 
-                          change={getWoWChange(metrics, idx, x => x.total_signups)} 
-                        />
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="sticky left-0 bg-background">Total FTDs</TableCell>
-                    {metrics.slice(0, 8).map((m, idx) => (
-                      <TableCell key={m.week_start} className="text-center">
-                        <MetricCell 
-                          value={m.total_ftds} 
-                          formatted={formatNumber(m.total_ftds)} 
-                          change={getWoWChange(metrics, idx, x => x.total_ftds)} 
-                        />
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="sticky left-0 bg-background">Total STDs</TableCell>
-                    {metrics.slice(0, 8).map((m, idx) => (
-                      <TableCell key={m.week_start} className="text-center">
-                        <MetricCell 
-                          value={m.total_stds} 
-                          formatted={formatNumber(m.total_stds)} 
-                          change={getWoWChange(metrics, idx, x => x.total_stds)} 
-                        />
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="sticky left-0 bg-background">Total HVPs</TableCell>
-                    {metrics.slice(0, 8).map((m, idx) => (
-                      <TableCell key={m.week_start} className="text-center">
-                        <MetricCell 
-                          value={m.total_hvps} 
-                          formatted={formatNumber(m.total_hvps)} 
-                          change={getWoWChange(metrics, idx, x => x.total_hvps)} 
-                        />
-                      </TableCell>
-                    ))}
-                  </TableRow>
-
-                  {/* Conversion Rates */}
-                  <TableRow className="bg-muted/30">
-                    <TableCell className="sticky left-0 bg-muted/30 font-medium" colSpan={metrics.length + 1}>
-                      Conversion Rates
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="sticky left-0 bg-background">Install → Signup</TableCell>
-                    {metrics.slice(0, 8).map((m, idx) => (
-                      <TableCell key={m.week_start} className="text-center">
-                        <MetricCell 
-                          value={m.cvr_install_to_signup} 
-                          formatted={formatPercent(m.cvr_install_to_signup)} 
-                          change={getWoWChange(metrics, idx, x => x.cvr_install_to_signup)} 
-                        />
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="sticky left-0 bg-background">Signup → FTD</TableCell>
-                    {metrics.slice(0, 8).map((m, idx) => (
-                      <TableCell key={m.week_start} className="text-center">
-                        <MetricCell 
-                          value={m.cvr_signup_to_ftd} 
-                          formatted={formatPercent(m.cvr_signup_to_ftd)} 
-                          change={getWoWChange(metrics, idx, x => x.cvr_signup_to_ftd)} 
-                        />
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="sticky left-0 bg-background">FTD → STD</TableCell>
-                    {metrics.slice(0, 8).map((m, idx) => (
-                      <TableCell key={m.week_start} className="text-center">
-                        <MetricCell 
-                          value={m.cvr_ftd_to_std} 
-                          formatted={formatPercent(m.cvr_ftd_to_std)} 
-                          change={getWoWChange(metrics, idx, x => x.cvr_ftd_to_std)} 
-                        />
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="sticky left-0 bg-background">Install → STD</TableCell>
-                    {metrics.slice(0, 8).map((m, idx) => (
-                      <TableCell key={m.week_start} className="text-center">
-                        <MetricCell 
-                          value={m.cvr_install_to_std} 
-                          formatted={formatPercent(m.cvr_install_to_std)} 
-                          change={getWoWChange(metrics, idx, x => x.cvr_install_to_std)} 
-                        />
-                      </TableCell>
-                    ))}
-                  </TableRow>
-
-                  {/* Spend Metrics */}
-                  <TableRow className="bg-muted/30">
-                    <TableCell className="sticky left-0 bg-muted/30 font-medium" colSpan={metrics.length + 1}>
-                      Spend
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="sticky left-0 bg-background">Total Ad Spend</TableCell>
-                    {metrics.slice(0, 8).map((m, idx) => (
-                      <TableCell key={m.week_start} className="text-center">
-                        <MetricCell 
-                          value={m.total_ad_spend} 
-                          formatted={formatCurrency(m.total_ad_spend)} 
-                          change={getWoWChange(metrics, idx, x => x.total_ad_spend)} 
-                        />
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="sticky left-0 bg-background">Total Affiliate Spend</TableCell>
-                    {metrics.slice(0, 8).map((m, idx) => (
-                      <TableCell key={m.week_start} className="text-center">
-                        <MetricCell 
-                          value={m.total_affiliate_spend} 
-                          formatted={formatCurrency(m.total_affiliate_spend)} 
-                          change={getWoWChange(metrics, idx, x => x.total_affiliate_spend)} 
-                        />
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="sticky left-0 bg-background font-medium">Total Spend</TableCell>
-                    {metrics.slice(0, 8).map((m, idx) => (
-                      <TableCell key={m.week_start} className="text-center font-medium">
-                        <MetricCell 
-                          value={m.total_spend} 
-                          formatted={formatCurrency(m.total_spend)} 
-                          change={getWoWChange(metrics, idx, x => x.total_spend)} 
-                        />
-                      </TableCell>
-                    ))}
-                  </TableRow>
-
-                  {/* Cost Metrics */}
-                  <TableRow className="bg-muted/30">
-                    <TableCell className="sticky left-0 bg-muted/30 font-medium" colSpan={metrics.length + 1}>
-                      Cost Metrics
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="sticky left-0 bg-background">Blended CAC</TableCell>
-                    {metrics.slice(0, 8).map((m, idx) => (
-                      <TableCell key={m.week_start} className="text-center">
-                        <MetricCell 
-                          value={m.blended_cac} 
-                          formatted={formatCurrencyDecimal(m.blended_cac)} 
-                          change={getWoWChange(metrics, idx, x => x.blended_cac)} 
-                          invertColors 
-                        />
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="sticky left-0 bg-background">Blended CPA</TableCell>
-                    {metrics.slice(0, 8).map((m, idx) => (
-                      <TableCell key={m.week_start} className="text-center">
-                        <MetricCell 
-                          value={m.blended_cpa} 
-                          formatted={formatCurrencyDecimal(m.blended_cpa)} 
-                          change={getWoWChange(metrics, idx, x => x.blended_cpa)} 
-                          invertColors 
-                        />
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="sticky left-0 bg-background">Blended Cost / HVP</TableCell>
-                    {metrics.slice(0, 8).map((m, idx) => (
-                      <TableCell key={m.week_start} className="text-center">
-                        <MetricCell 
-                          value={m.cost_per_hvp} 
-                          formatted={formatCurrencyDecimal(m.cost_per_hvp)} 
-                          change={getWoWChange(metrics, idx, x => x.cost_per_hvp)} 
-                          invertColors 
-                        />
-                      </TableCell>
-                    ))}
-                  </TableRow>
-
-                  {/* Revenue Metrics */}
-                  <TableRow className="bg-muted/30">
-                    <TableCell className="sticky left-0 bg-muted/30 font-medium" colSpan={metrics.length + 1}>
-                      Revenue
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="sticky left-0 bg-background">FTD Cohort Deposits</TableCell>
-                    {metrics.slice(0, 8).map((m, idx) => (
-                      <TableCell key={m.week_start} className="text-center">
-                        <MetricCell 
-                          value={m.ftd_cohort_deposits} 
-                          formatted={formatCurrency(m.ftd_cohort_deposits)} 
-                          change={getWoWChange(metrics, idx, x => x.ftd_cohort_deposits)} 
-                        />
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="sticky left-0 bg-background">Avg Deposit / FTD</TableCell>
-                    {metrics.slice(0, 8).map((m, idx) => (
-                      <TableCell key={m.week_start} className="text-center">
-                        <MetricCell 
-                          value={m.avg_deposit_per_ftd} 
-                          formatted={formatCurrency(m.avg_deposit_per_ftd)} 
-                          change={getWoWChange(metrics, idx, x => x.avg_deposit_per_ftd)} 
-                        />
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="sticky left-0 bg-background">Ad Spend / £1k Deposit</TableCell>
-                    {metrics.slice(0, 8).map((m, idx) => (
-                      <TableCell key={m.week_start} className="text-center">
-                        <MetricCell 
-                          value={m.ad_spend_per_1k_deposit} 
-                          formatted={formatCurrency(m.ad_spend_per_1k_deposit)} 
-                          change={getWoWChange(metrics, idx, x => x.ad_spend_per_1k_deposit)} 
-                          invertColors 
-                        />
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="sticky left-0 bg-background">Net Deposits (AF LTV)</TableCell>
-                    {metrics.slice(0, 8).map((m, idx) => (
-                      <TableCell key={m.week_start} className="text-center">
-                        <MetricCell 
-                          value={m.net_deposits_new_users} 
-                          formatted={formatCurrency(m.net_deposits_new_users)} 
-                          change={getWoWChange(metrics, idx, x => x.net_deposits_new_users)} 
-                        />
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="sticky left-0 bg-background font-medium">New Users Net Deposits</TableCell>
-                    {metrics.slice(0, 8).map((m, idx) => (
-                      <TableCell key={m.week_start} className="text-center font-medium">
-                        <MetricCell 
-                          value={m.new_users_net_deposits} 
-                          formatted={formatCurrency(m.new_users_net_deposits)} 
-                          change={getWoWChange(metrics, idx, x => x.new_users_net_deposits)} 
-                        />
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="sticky left-0 bg-background">ROAS</TableCell>
-                    {metrics.slice(0, 8).map((m, idx) => (
-                      <TableCell key={m.week_start} className="text-center">
-                        <MetricCell 
-                          value={m.roas} 
-                          formatted={`${m.roas.toFixed(2)}x`} 
-                          change={getWoWChange(metrics, idx, x => x.roas)} 
-                        />
-                      </TableCell>
-                    ))}
-                  </TableRow>
-
-                  {/* Ratings */}
-                  <TableRow className="bg-muted/30">
-                    <TableCell className="sticky left-0 bg-muted/30 font-medium" colSpan={metrics.length + 1}>
-                      Ratings
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="sticky left-0 bg-background">Avg Rating (Weighted)</TableCell>
-                    {metrics.slice(0, 8).map((m, idx) => (
-                      <TableCell key={m.week_start} className="text-center">
-                        <div className="flex flex-col items-center">
-                          <span className="flex items-center justify-center gap-1">
-                            <Star className="h-3 w-3 text-warning fill-warning" />
-                            {formatRating(m.avg_rating)}
-                          </span>
-                          {(() => {
-                            const change = getWoWChange(metrics, idx, x => x.avg_rating);
-                            if (change === null || !isFinite(change)) return null;
-                            const isPositive = change >= 0;
+                  {/* Dynamic metric rows from tracker config */}
+                  {groupMetricsBySection(trackerMetrics).map(({ section, metrics: sectionMetrics }) => (
+                    <>
+                      <TableRow key={`section-${section}`} className="bg-muted/30">
+                        <TableCell className="sticky left-0 bg-muted/30 font-medium" colSpan={metrics.length + 1}>
+                          {section}
+                        </TableCell>
+                      </TableRow>
+                      {sectionMetrics.map(def => (
+                        <TableRow key={def.key}>
+                          <TableCell className={`sticky left-0 bg-background ${def.isBold ? 'font-medium' : ''}`}>
+                            {def.format === 'rating' ? (
+                              <span className="flex items-center gap-1"><Star className="h-3 w-3 text-warning fill-warning" />{def.label}</span>
+                            ) : def.label}
+                          </TableCell>
+                          {metrics.slice(0, 8).map((m, idx) => {
+                            const value = def.getValue(m);
+                            const change = getWoWChange(metrics, idx, x => def.getValue(x));
                             return (
-                              <span className={`text-[10px] ${isPositive ? 'text-success' : 'text-destructive'}`}>
-                                {isPositive ? '+' : ''}{Math.round(change)}%
-                              </span>
+                              <TableCell key={m.week_start} className={`text-center ${def.isBold ? 'font-medium' : ''}`}>
+                                <MetricCell
+                                  value={value}
+                                  formatted={formatMetricValue(value, def.format)}
+                                  change={change}
+                                  invertColors={def.invertColors}
+                                />
+                              </TableCell>
                             );
-                          })()}
-                        </div>
-                      </TableCell>
-                    ))}
-                  </TableRow>
+                          })}
+                        </TableRow>
+                      ))}
+                    </>
+                  ))}
 
                   {/* Channel Spend Breakdown */}
                   {channels.length > 0 && (
@@ -959,11 +672,7 @@ export default function WeeklyTracker() {
                             const change = getWoWChange(metrics, idx, x => x.spend_by_channel?.[channel] || 0);
                             return (
                               <TableCell key={m.week_start} className="text-center">
-                                <MetricCell 
-                                  value={value} 
-                                  formatted={formatCurrency(value)} 
-                                  change={change} 
-                                />
+                                <MetricCell value={value} formatted={formatCurrency(value)} change={change} />
                               </TableCell>
                             );
                           })}
@@ -988,11 +697,7 @@ export default function WeeklyTracker() {
                             const change = getWoWChange(metrics, idx, x => x.ftds_by_channel?.[channel] || 0);
                             return (
                               <TableCell key={m.week_start} className="text-center">
-                                <MetricCell 
-                                  value={value} 
-                                  formatted={formatNumber(value)} 
-                                  change={change} 
-                                />
+                                <MetricCell value={value} formatted={formatNumber(value)} change={change} />
                               </TableCell>
                             );
                           })}
@@ -1017,12 +722,7 @@ export default function WeeklyTracker() {
                             const change = getWoWChange(metrics, idx, x => x.cpa_by_channel?.[channel] || 0);
                             return (
                               <TableCell key={m.week_start} className="text-center">
-                                <MetricCell 
-                                  value={value} 
-                                  formatted={value ? formatCurrency(value) : '-'} 
-                                  change={value ? change : null} 
-                                  invertColors 
-                                />
+                                <MetricCell value={value} formatted={value ? formatCurrency(value) : '-'} change={value ? change : null} invertColors />
                               </TableCell>
                             );
                           })}
@@ -1047,11 +747,7 @@ export default function WeeklyTracker() {
                             const change = getWoWChange(metrics, idx, x => x.affiliate_metrics?.[id]?.spend || 0);
                             return (
                               <TableCell key={m.week_start} className="text-center">
-                                <MetricCell 
-                                  value={value} 
-                                  formatted={formatCurrency(value)} 
-                                  change={change} 
-                                />
+                                <MetricCell value={value} formatted={formatCurrency(value)} change={change} />
                               </TableCell>
                             );
                           })}
