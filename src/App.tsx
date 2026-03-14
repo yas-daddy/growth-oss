@@ -72,7 +72,7 @@ const App = () => (
               
               {/* Non-dashboard pages */}
               <Route path="/projections" element={<ProtectedRoute><Projections /></ProtectedRoute>} />
-              <Route path="/brand-visibility" element={<ProtectedRoute><BrandVisibility /></ProtectedRoute>} />
+              
               <Route path="/top-ads" element={<ProtectedRoute><TopAds /></ProtectedRoute>} />
               <Route path="/creative-analysis" element={<ProtectedRoute><CreativeAnalysis /></ProtectedRoute>} />
               <Route path="/keyword-analysis" element={<ProtectedRoute><KeywordAnalysis /></ProtectedRoute>} />
