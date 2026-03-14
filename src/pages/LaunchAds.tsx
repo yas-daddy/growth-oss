@@ -926,6 +926,7 @@ export default function LaunchAds() {
   return (
     <>
       <div className="space-y-6">
+        <ConnectProvidersAlert />
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-2xl font-semibold text-foreground">Launch Ads</h1>
