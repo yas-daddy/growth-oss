@@ -1172,6 +1172,47 @@ export type Database = {
         }
         Relationships: []
       }
+      conversion_events: {
+        Row: {
+          created_at: string
+          event_label: string
+          event_name: string
+          id: string
+          is_primary: boolean
+          org_id: string
+          source_provider: Database["public"]["Enums"]["provider_type"] | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          event_label: string
+          event_name: string
+          id?: string
+          is_primary?: boolean
+          org_id: string
+          source_provider?: Database["public"]["Enums"]["provider_type"] | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          event_label?: string
+          event_name?: string
+          id?: string
+          is_primary?: boolean
+          org_id?: string
+          source_provider?: Database["public"]["Enums"]["provider_type"] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversion_events_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cpa_threshold_settings: {
         Row: {
           created_at: string
@@ -2266,6 +2307,65 @@ export type Database = {
         }
         Relationships: []
       }
+      organization_members: {
+        Row: {
+          created_at: string
+          id: string
+          org_id: string
+          role: Database["public"]["Enums"]["org_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          org_id: string
+          role?: Database["public"]["Enums"]["org_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          org_id?: string
+          role?: Database["public"]["Enums"]["org_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_members_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organizations: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       pending_responses: {
         Row: {
           ai_response: string
@@ -2324,6 +2424,7 @@ export type Database = {
           full_name: string | null
           id: string
           last_login_at: string | null
+          onboarding_completed: boolean
           updated_at: string
           user_id: string
         }
@@ -2333,6 +2434,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           last_login_at?: string | null
+          onboarding_completed?: boolean
           updated_at?: string
           user_id: string
         }
@@ -2342,10 +2444,64 @@ export type Database = {
           full_name?: string | null
           id?: string
           last_login_at?: string | null
+          onboarding_completed?: boolean
           updated_at?: string
           user_id?: string
         }
         Relationships: []
+      }
+      provider_connections: {
+        Row: {
+          auth_method: Database["public"]["Enums"]["auth_method"]
+          connected_at: string | null
+          created_at: string
+          credentials: Json
+          display_name: string | null
+          error_message: string | null
+          id: string
+          last_synced_at: string | null
+          org_id: string
+          provider: Database["public"]["Enums"]["provider_type"]
+          status: Database["public"]["Enums"]["connection_status"]
+          updated_at: string
+        }
+        Insert: {
+          auth_method: Database["public"]["Enums"]["auth_method"]
+          connected_at?: string | null
+          created_at?: string
+          credentials?: Json
+          display_name?: string | null
+          error_message?: string | null
+          id?: string
+          last_synced_at?: string | null
+          org_id: string
+          provider: Database["public"]["Enums"]["provider_type"]
+          status?: Database["public"]["Enums"]["connection_status"]
+          updated_at?: string
+        }
+        Update: {
+          auth_method?: Database["public"]["Enums"]["auth_method"]
+          connected_at?: string | null
+          created_at?: string
+          credentials?: Json
+          display_name?: string | null
+          error_message?: string | null
+          id?: string
+          last_synced_at?: string | null
+          org_id?: string
+          provider?: Database["public"]["Enums"]["provider_type"]
+          status?: Database["public"]["Enums"]["connection_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_connections_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       report_definitions: {
         Row: {
@@ -2546,6 +2702,50 @@ export type Database = {
           status?: string
         }
         Relationships: []
+      }
+      tracker_metric_config: {
+        Row: {
+          created_at: string
+          data_source: string | null
+          display_order: number
+          id: string
+          is_visible: boolean
+          metric_key: string
+          metric_label: string
+          org_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          data_source?: string | null
+          display_order?: number
+          id?: string
+          is_visible?: boolean
+          metric_key: string
+          metric_label: string
+          org_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          data_source?: string | null
+          display_order?: number
+          id?: string
+          is_visible?: boolean
+          metric_key?: string
+          metric_label?: string
+          org_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tracker_metric_config_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       trustpilot_reviews: {
         Row: {
@@ -2931,6 +3131,7 @@ export type Database = {
         Returns: string[]
       }
       get_user_affiliate_ids: { Args: { _user_id: string }; Returns: string[] }
+      get_user_org_ids: { Args: { _user_id: string }; Returns: string[] }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -2939,6 +3140,14 @@ export type Database = {
         Returns: boolean
       }
       is_affiliate_only: { Args: { _user_id: string }; Returns: boolean }
+      is_org_admin: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_org_member: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: boolean
+      }
       populate_daily_funnel_metrics: {
         Args: { end_dt?: string; start_dt?: string }
         Returns: Json
@@ -2954,6 +3163,20 @@ export type Database = {
     Enums: {
       affiliate_status: "active" | "paused" | "inactive"
       app_role: "admin" | "editor" | "viewer" | "user" | "affiliate"
+      auth_method: "oauth" | "api_key"
+      connection_status: "connected" | "disconnected" | "error"
+      org_role: "owner" | "admin" | "member"
+      provider_type:
+        | "meta_ads"
+        | "apple_search_ads"
+        | "moloco"
+        | "appsflyer"
+        | "mixpanel"
+        | "google_play"
+        | "app_store"
+        | "trustpilot"
+        | "google_search_console"
+        | "typeform"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -3083,6 +3306,21 @@ export const Constants = {
     Enums: {
       affiliate_status: ["active", "paused", "inactive"],
       app_role: ["admin", "editor", "viewer", "user", "affiliate"],
+      auth_method: ["oauth", "api_key"],
+      connection_status: ["connected", "disconnected", "error"],
+      org_role: ["owner", "admin", "member"],
+      provider_type: [
+        "meta_ads",
+        "apple_search_ads",
+        "moloco",
+        "appsflyer",
+        "mixpanel",
+        "google_play",
+        "app_store",
+        "trustpilot",
+        "google_search_console",
+        "typeform",
+      ],
     },
   },
 } as const
