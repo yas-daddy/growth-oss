@@ -34,7 +34,7 @@ import {
 import { NavLink } from '@/components/NavLink';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import stakemateLogo from '@/assets/stakemate-logo.png';
+
 import { useUserRole } from '@/hooks/useUserRole';
 import { useAllDashboards } from '@/hooks/useDashboardConfig';
 import { DashboardManagerDialog, getIconComponent } from '@/components/dashboard/DashboardManagerDialog';
