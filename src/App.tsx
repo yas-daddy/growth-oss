@@ -7,6 +7,7 @@ import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/hooks/useAuth";
 import { OrganizationProvider } from "@/hooks/useOrganization";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import LandingPage from "./pages/LandingPage";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
@@ -63,7 +64,8 @@ const App = () => (
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/onboarding" element={<Onboarding />} />
-                <Route path="/" element={<Index />} />
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/app" element={<Index />} />
                 <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
                 
                 {/* All dashboards use the unified DashboardPage */}
