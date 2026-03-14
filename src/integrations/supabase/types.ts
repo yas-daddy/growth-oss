@@ -3238,7 +3238,13 @@ export type Database = {
     }
     Enums: {
       affiliate_status: "active" | "paused" | "inactive"
-      app_role: "admin" | "editor" | "viewer" | "user" | "affiliate"
+      app_role:
+        | "admin"
+        | "editor"
+        | "viewer"
+        | "user"
+        | "affiliate"
+        | "super_admin"
       auth_method: "oauth" | "api_key"
       connection_status: "connected" | "disconnected" | "error"
       org_role: "owner" | "admin" | "member"
@@ -3381,7 +3387,14 @@ export const Constants = {
   public: {
     Enums: {
       affiliate_status: ["active", "paused", "inactive"],
-      app_role: ["admin", "editor", "viewer", "user", "affiliate"],
+      app_role: [
+        "admin",
+        "editor",
+        "viewer",
+        "user",
+        "affiliate",
+        "super_admin",
+      ],
       auth_method: ["oauth", "api_key"],
       connection_status: ["connected", "disconnected", "error"],
       org_role: ["owner", "admin", "member"],
