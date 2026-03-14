@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -7,10 +7,11 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ArrowLeft, CheckCircle2, Plug, Loader2, Unplug, ChevronDown, HelpCircle } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { ArrowLeft, CheckCircle2, Plug, Loader2, Unplug, ChevronDown, HelpCircle, Facebook } from 'lucide-react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useProviderConnections, useUpsertProviderConnection, useDisconnectProvider } from '@/hooks/useProviderConnections';
 import { useOrganization } from '@/hooks/useOrganization';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 interface ProviderField {
@@ -31,25 +32,29 @@ interface ProviderDef {
   fields: ProviderField[];
 }
 
+interface MetaAdAccount {
+  id: string;
+  account_id: string;
+  name: string;
+  account_status: number;
+  currency: string;
+}
+
+interface MetaPage {
+  id: string;
+  name: string;
+  instagram_business_account_id: string | null;
+}
+
 const PROVIDERS: ProviderDef[] = [
   {
     type: 'meta_ads',
     label: 'Meta Ads',
     category: 'Ad Platform',
     method: 'oauth',
-    description: 'Facebook & Instagram advertising. Connect via OAuth to sync campaigns, ads, and performance data.',
-    fields: [
-      { key: 'access_token', label: 'Access Token', type: 'password', placeholder: 'Your long-lived access token', helpText: 'Generate from Facebook Business Settings → System Users' },
-      { key: 'ad_account_id', label: 'Ad Account ID', type: 'text', placeholder: 'act_123456789' },
-    ],
-    setupGuide: [
-      'Go to business.facebook.com and open Business Settings.',
-      'In the left menu, click "Users" → "System Users". If you don\'t have one, click "Add" to create a new System User with Admin role.',
-      'Click on your System User, then click "Generate New Token".',
-      'Select your app, then check the permissions: ads_read and ads_management. Click "Generate Token".',
-      'Copy the token — this is your Access Token. Store it somewhere safe as it won\'t be shown again.',
-      'For your Ad Account ID: go to Business Settings → "Accounts" → "Ad Accounts". Your ID starts with "act_" followed by numbers.',
-    ],
+    description: 'Facebook & Instagram advertising. Connect via Facebook Login to sync campaigns, ads, and performance data.',
+    fields: [],
+    setupGuide: [],
   },
   {
     type: 'apple_search_ads',
@@ -221,15 +226,128 @@ export default function ConnectionsSettings() {
   const upsertConnection = useUpsertProviderConnection();
   const disconnectProvider = useDisconnectProvider();
 
+  const [searchParams, setSearchParams] = useSearchParams();
   const [connectDialog, setConnectDialog] = useState<ProviderDef | null>(null);
   const [disconnectDialog, setDisconnectDialog] = useState<string | null>(null);
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [guideOpen, setGuideOpen] = useState(false);
 
+  // Meta OAuth state
+  const [metaOAuthLoading, setMetaOAuthLoading] = useState(false);
+  const [metaAccountDialog, setMetaAccountDialog] = useState(false);
+  const [metaAdAccounts, setMetaAdAccounts] = useState<MetaAdAccount[]>([]);
+  const [metaPages, setMetaPages] = useState<MetaPage[]>([]);
+  const [metaAccessToken, setMetaAccessToken] = useState('');
+  const [selectedAdAccount, setSelectedAdAccount] = useState<string>('');
+  const [selectedPage, setSelectedPage] = useState<string>('');
+  const [metaSaving, setMetaSaving] = useState(false);
+  const [showAdvancedMeta, setShowAdvancedMeta] = useState(false);
+
   const getConnection = (providerType: string) =>
     connections?.find(c => c.provider === providerType && c.status === 'connected');
 
+  // Handle Meta OAuth callback
+  const handleMetaCallback = useCallback(async (code: string) => {
+    setMetaOAuthLoading(true);
+    try {
+      const redirectUri = `${window.location.origin}/settings/connections`;
+      const { data, error } = await supabase.functions.invoke('meta-oauth-callback', {
+        body: { code, redirect_uri: redirectUri },
+      });
+
+      if (error) throw error;
+      if (data.error) throw new Error(data.error);
+
+      setMetaAccessToken(data.access_token);
+      setMetaAdAccounts(data.ad_accounts || []);
+      setMetaPages(data.pages || []);
+
+      // Auto-select if only one account
+      if (data.ad_accounts?.length === 1) {
+        setSelectedAdAccount(data.ad_accounts[0].id);
+      }
+      if (data.pages?.length === 1) {
+        setSelectedPage(data.pages[0].id);
+      }
+
+      setMetaAccountDialog(true);
+    } catch (err: any) {
+      console.error('Meta OAuth error:', err);
+      toast.error(err.message || 'Failed to connect to Facebook');
+    } finally {
+      setMetaOAuthLoading(false);
+    }
+  }, []);
+
+  // Check for OAuth callback on mount
+  useEffect(() => {
+    const code = searchParams.get('code');
+    const state = searchParams.get('state');
+    if (code && state === 'meta_callback') {
+      // Clean up URL params
+      searchParams.delete('code');
+      searchParams.delete('state');
+      setSearchParams(searchParams, { replace: true });
+      handleMetaCallback(code);
+    }
+  }, [searchParams, setSearchParams, handleMetaCallback]);
+
+  const handleMetaOAuthStart = async () => {
+    setMetaOAuthLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('meta-oauth-app-id');
+      if (error) throw error;
+      if (!data?.app_id) throw new Error('Meta App not configured');
+
+      const redirectUri = `${window.location.origin}/settings/connections`;
+      const scope = 'ads_read,ads_management,pages_read_engagement,pages_show_list';
+      const oauthUrl = `https://www.facebook.com/v21.0/dialog/oauth?client_id=${data.app_id}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${scope}&response_type=code&state=meta_callback`;
+
+      window.location.href = oauthUrl;
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to start Facebook login');
+      setMetaOAuthLoading(false);
+    }
+  };
+
+  const handleMetaAccountSave = async () => {
+    if (!selectedAdAccount) {
+      toast.error('Please select an ad account');
+      return;
+    }
+    setMetaSaving(true);
+    try {
+      const selectedPageObj = metaPages.find(p => p.id === selectedPage);
+      const { data, error } = await supabase.functions.invoke('meta-oauth-save', {
+        body: {
+          access_token: metaAccessToken,
+          ad_account_id: selectedAdAccount,
+          page_id: selectedPage || null,
+          instagram_actor_id: selectedPageObj?.instagram_business_account_id || null,
+          display_name: metaAdAccounts.find(a => a.id === selectedAdAccount)?.name || 'Meta Ads',
+        },
+      });
+
+      if (error) throw error;
+      if (data.error) throw new Error(data.error);
+
+      toast.success('Meta Ads connected successfully via Facebook Login');
+      setMetaAccountDialog(false);
+      // Refresh connections
+      window.location.reload();
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to save Meta connection');
+    } finally {
+      setMetaSaving(false);
+    }
+  };
+
   const openConnectDialog = (provider: ProviderDef) => {
+    // For Meta, start OAuth flow instead of showing form
+    if (provider.type === 'meta_ads' && !showAdvancedMeta) {
+      handleMetaOAuthStart();
+      return;
+    }
     const existing = connections?.find(c => c.provider === provider.type);
     const initialData: Record<string, string> = {};
     provider.fields.forEach(f => {
@@ -274,6 +392,12 @@ export default function ConnectionsSettings() {
 
   const categories = [...new Set(PROVIDERS.map(p => p.category))];
 
+  // Advanced Meta fields for manual token entry
+  const advancedMetaFields: ProviderField[] = [
+    { key: 'access_token', label: 'Access Token', type: 'password', placeholder: 'Your long-lived access token', helpText: 'Generate from Facebook Business Settings → System Users' },
+    { key: 'ad_account_id', label: 'Ad Account ID', type: 'text', placeholder: 'act_123456789' },
+  ];
+
   return (
     <div className="space-y-6 animate-fade-in max-w-4xl">
       <div className="flex items-center gap-4">
@@ -298,6 +422,7 @@ export default function ConnectionsSettings() {
               {PROVIDERS.filter(p => p.category === category).map(provider => {
                 const connection = getConnection(provider.type);
                 const isConnected = !!connection;
+                const isMetaProvider = provider.type === 'meta_ads';
 
                 return (
                   <Card key={provider.type} className="overflow-hidden">
@@ -338,17 +463,33 @@ export default function ConnectionsSettings() {
                             <>
                               {isConnected ? (
                                 <>
-                                  <Button size="sm" variant="outline" onClick={() => openConnectDialog(provider)}>
-                                    Edit
-                                  </Button>
+                                  {isMetaProvider ? (
+                                    <Button size="sm" variant="outline" onClick={handleMetaOAuthStart} disabled={metaOAuthLoading}>
+                                      {metaOAuthLoading ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Facebook className="h-3 w-3 mr-1" />}
+                                      Reconnect
+                                    </Button>
+                                  ) : (
+                                    <Button size="sm" variant="outline" onClick={() => openConnectDialog(provider)}>
+                                      Edit
+                                    </Button>
+                                  )}
                                   <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => setDisconnectDialog(provider.type)}>
                                     <Unplug className="h-4 w-4" />
                                   </Button>
                                 </>
                               ) : (
-                                <Button size="sm" onClick={() => openConnectDialog(provider)}>
-                                  <Plug className="h-3 w-3 mr-1" /> Connect
-                                </Button>
+                                isMetaProvider ? (
+                                  <div className="flex flex-col gap-1">
+                                    <Button size="sm" onClick={handleMetaOAuthStart} disabled={metaOAuthLoading}>
+                                      {metaOAuthLoading ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Facebook className="h-3 w-3 mr-1" />}
+                                      Connect with Facebook
+                                    </Button>
+                                  </div>
+                                ) : (
+                                  <Button size="sm" onClick={() => openConnectDialog(provider)}>
+                                    <Plug className="h-3 w-3 mr-1" /> Connect
+                                  </Button>
+                                )
                               )}
                             </>
                           )}
@@ -363,7 +504,97 @@ export default function ConnectionsSettings() {
         ))
       )}
 
-      {/* Connect Dialog */}
+      {/* Meta Account Selector Dialog */}
+      <Dialog open={metaAccountDialog} onOpenChange={setMetaAccountDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Select Ad Account</DialogTitle>
+            <DialogDescription>
+              Choose which Meta ad account to connect to GrowthOS.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            {metaAdAccounts.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                No ad accounts found. Make sure your Facebook account has access to at least one ad account.
+              </p>
+            ) : (
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Ad Account</Label>
+                <div className="grid gap-2">
+                  {metaAdAccounts.map(account => (
+                    <button
+                      key={account.id}
+                      onClick={() => setSelectedAdAccount(account.id)}
+                      className={`flex items-center justify-between p-3 rounded-lg border text-left transition-colors ${
+                        selectedAdAccount === account.id
+                          ? 'border-primary bg-primary/5'
+                          : 'border-border hover:bg-muted/50'
+                      }`}
+                    >
+                      <div>
+                        <p className="text-sm font-medium">{account.name}</p>
+                        <p className="text-xs text-muted-foreground">{account.id} · {account.currency}</p>
+                      </div>
+                      {selectedAdAccount === account.id && (
+                        <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {metaPages.length > 0 && (
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Facebook Page (optional)</Label>
+                <div className="grid gap-2">
+                  <button
+                    onClick={() => setSelectedPage('')}
+                    className={`flex items-center p-3 rounded-lg border text-left transition-colors text-sm ${
+                      !selectedPage ? 'border-primary bg-primary/5' : 'border-border hover:bg-muted/50'
+                    }`}
+                  >
+                    None
+                  </button>
+                  {metaPages.map(page => (
+                    <button
+                      key={page.id}
+                      onClick={() => setSelectedPage(page.id)}
+                      className={`flex items-center justify-between p-3 rounded-lg border text-left transition-colors ${
+                        selectedPage === page.id
+                          ? 'border-primary bg-primary/5'
+                          : 'border-border hover:bg-muted/50'
+                      }`}
+                    >
+                      <div>
+                        <p className="text-sm font-medium">{page.name}</p>
+                        {page.instagram_business_account_id && (
+                          <p className="text-xs text-muted-foreground">Has Instagram business account</p>
+                        )}
+                      </div>
+                      {selectedPage === page.id && (
+                        <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setMetaAccountDialog(false)}>Cancel</Button>
+            <Button onClick={handleMetaAccountSave} disabled={!selectedAdAccount || metaSaving}>
+              {metaSaving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+              Connect Account
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Connect Dialog (non-Meta providers) */}
       <Dialog open={!!connectDialog} onOpenChange={() => setConnectDialog(null)}>
         <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto">
           <DialogHeader>
@@ -372,7 +603,7 @@ export default function ConnectionsSettings() {
           </DialogHeader>
 
           {/* Setup Guide */}
-          {connectDialog && (
+          {connectDialog && connectDialog.setupGuide.length > 0 && (
             <Collapsible open={guideOpen} onOpenChange={setGuideOpen}>
               <CollapsibleTrigger asChild>
                 <Button variant="ghost" size="sm" className="w-full justify-between text-muted-foreground hover:text-foreground mb-1">
