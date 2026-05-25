@@ -296,7 +296,7 @@ export default function Auth() {
               <div className="text-center space-y-1">
                 {mode === 'signin' && (
                   <p className="text-sm text-muted-foreground">
-                    Have an invitation?{' '}
+                    Don't have an account?{' '}
                     <button
                       type="button"
                       onClick={() => setMode('signup')}
