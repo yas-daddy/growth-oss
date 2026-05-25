@@ -90,13 +90,7 @@ export default function Auth() {
     setIsSubmitting(false);
 
     if (error) {
-      if (error.message.includes('Signup not allowed') || error.message.includes('not allowed')) {
-        toast({
-          title: 'Invitation Required',
-          description: 'You need a valid invitation to create an account. Please ask your team admin to invite you.',
-          variant: 'destructive',
-        });
-      } else if (error.message.includes('already registered')) {
+      if (error.message.includes('already registered')) {
         toast({
           title: 'Account Exists',
           description: 'This email is already registered. Please sign in instead.',
@@ -302,7 +296,7 @@ export default function Auth() {
               <div className="text-center space-y-1">
                 {mode === 'signin' && (
                   <p className="text-sm text-muted-foreground">
-                    Have an invitation?{' '}
+                    Don't have an account?{' '}
                     <button
                       type="button"
                       onClick={() => setMode('signup')}
