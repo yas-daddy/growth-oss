@@ -144,9 +144,6 @@ export default function LandingPage() {
                 Get Started Free <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
-            <Button size="lg" variant="outline" asChild className="px-8 text-base">
-              <a href="mailto:hello@growthOS.app">Book a Demo</a>
-            </Button>
           </div>
         </div>
       </section>
