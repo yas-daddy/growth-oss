@@ -268,7 +268,7 @@ export default function LandingPage() {
             <span className="font-semibold gradient-text">GrowthOS</span>
             <Link to="/docs" className="hover:text-foreground transition-colors">Docs</Link>
           </div>
-          <span>© {new Date().getFullYear()} GrowthOS. All rights reserved.</span>
+          <span>© {new Date().getFullYear()} GrowthOS by Yasin Kheradmand. All rights reserved.</span>
         </div>
       </footer>
     </div>
