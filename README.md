@@ -2,7 +2,7 @@
 
 > **Marketing command centre for acquisition performance analytics.**
 
-GrowthOS is an open-source platform that unifies growth data and automates routine marketing workflows using AI agents.
+GrowthOS is an open-source platform that unifies growth data and automates routine marketing workflows using AI agents. It's the open-source release of an internal tool built at [Stakemate](https://stakemate.com), where it serves as the daily command centre for growth, executive, finance, and product teams.
 
 **Live demo:** [growth-os.kerad.me](http://growth-os.kerad.me)
 
