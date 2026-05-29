@@ -6,7 +6,7 @@ GrowthOS unifies acquisition, spend, and conversion data from your growth stack 
 
 It started life as an internal tool for a mobile app growth team and is open-sourced here so others don't have to build the same plumbing from scratch. Take the whole thing, fork the parts you need, or just read the code to see how a real growth-analytics platform fits together.
 
-**Live demo:** [growth-os.kerad.me](http://growth-os.kerad.me) · **Talk:** [3 Powerful AI-Driven Growth Strategies (Business of Apps London, 2026)](https://www.businessofapps.com/video/3-powerful-ai-driven-growth-strategies-to-implement-in-2026/)
+**Live demo:** [growth-os.kerad.me](http://growos.tech) · **Talk:** [3 Powerful AI-Driven Growth Strategies (Business of Apps London, 2026)](https://www.businessofapps.com/video/3-powerful-ai-driven-growth-strategies-to-implement-in-2026/)
 
 ---
 
