@@ -5,8 +5,9 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const ONELINK_SUBDOMAIN = 'stakemate';
-const ONELINK_TEMPLATE_ID = 't3UP';
+// AppsFlyer OneLink config — set these to your own OneLink subdomain and template ID.
+const ONELINK_SUBDOMAIN = Deno.env.get('ONELINK_SUBDOMAIN') ?? 'your-brand';
+const ONELINK_TEMPLATE_ID = Deno.env.get('ONELINK_TEMPLATE_ID') ?? 'xxxx';
 
 interface OneLinkRequest {
   affiliate_id: string;

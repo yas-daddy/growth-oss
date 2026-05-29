@@ -1,5 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { startSyncLog, completeSyncLog } from "../_shared/sync-logger.ts";
+import { AI_MODEL_FAST, callAIText } from "../_shared/ai.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -278,12 +279,6 @@ async function getUnrespondedReviews(supabase: any, platform: string): Promise<R
 
 async function generateAIResponse(review: ReviewToProcess, customPrompt: string): Promise<string | null> {
   try {
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) {
-      console.error('LOVABLE_API_KEY not configured');
-      return null;
-    }
-
     // Platform-specific character limits
     const getCharLimit = (platform: string): number => {
       if (platform === 'Google Play') return 340;
@@ -306,30 +301,12 @@ Review: ${review.text || '(No text provided)'}
 Author: ${review.author || 'Anonymous'}
 `;
 
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: `Generate a response for this review:\n${reviewContext}` },
-        ],
-        max_tokens: 300,
-      }),
-    });
+    let suggestion = await callAIText(AI_MODEL_FAST, [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: `Generate a response for this review:\n${reviewContext}` },
+    ], { maxTokens: 300 });
 
-    if (!response.ok) {
-      console.error('AI API error:', await response.text());
-      return null;
-    }
 
-    const data = await response.json();
-    let suggestion = data.choices?.[0]?.message?.content || '';
-    
     // Truncate if over limit
     if (suggestion.length > charLimit) {
       const truncated = suggestion.substring(0, charLimit);

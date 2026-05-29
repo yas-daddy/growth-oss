@@ -1,62 +1,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { AI_MODEL_FAST, AI_MODEL_SMART, callAIText, callAITool } from "../_shared/ai.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
-
-// ---- AI call helpers ----
-
-const GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
-
-async function callAI(
-  apiKey: string,
-  model: string,
-  messages: any[],
-  tools: any[],
-  toolChoice: any
-) {
-  const res = await fetch(GATEWAY, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ model, messages, tools, tool_choice: toolChoice }),
-  });
-
-  if (!res.ok) {
-    const txt = await res.text();
-    console.error(`AI error (${res.status}):`, txt);
-    if (res.status === 429) throw Object.assign(new Error("Rate limit"), { status: 429 });
-    if (res.status === 402) throw Object.assign(new Error("Credits exhausted"), { status: 402 });
-    throw new Error(`AI gateway returned ${res.status}`);
-  }
-
-  const data = await res.json();
-  const tc = data.choices?.[0]?.message?.tool_calls?.[0];
-  if (!tc) throw new Error("AI did not return tool call");
-  return JSON.parse(tc.function.arguments);
-}
-
-async function callAIText(apiKey: string, model: string, messages: any[]): Promise<string> {
-  const res = await fetch(GATEWAY, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ model, messages, max_tokens: 50 }),
-  });
-  if (!res.ok) {
-    console.error("AI name generation failed:", res.status);
-    return "";
-  }
-  const data = await res.json();
-  return (data.choices?.[0]?.message?.content || "").trim().replace(/^["']|["']$/g, "");
-}
 
 // ---- Frame image helpers ----
 
@@ -148,7 +98,6 @@ const complianceTool = (name: string, desc: string) => ({
 // ---- 3-pass video analysis ----
 
 async function analyseVideoMultiPass(
-  apiKey: string,
   frameUrls: string[],
   videoDuration: number,
   rules: { id: string; label: string; description: string }[]
@@ -179,10 +128,10 @@ ${fmtRules(personRules)}
 Call the person_age_check tool with your findings.`;
 
     passes.push(
-      callAI(apiKey, "google/gemini-2.5-pro", [
+      callAITool(AI_MODEL_SMART, [
         { role: "system", content: sysPrompt },
         { role: "user", content: [{ type: "text", text: `Analyse these ${frameCount} frames from a ${videoDuration}s video ad for person/age compliance.` }, ...frames] },
-      ], [complianceTool("person_age_check", "Return person & age compliance results")], { type: "function", function: { name: "person_age_check" } })
+      ], [complianceTool("person_age_check", "Return person & age compliance results")], "person_age_check")
         .catch((e) => {
           console.error("Pass 1 (persons) failed:", e);
           return { results: personRules.map((r) => ({ rule_id: r.id, passed: false, reason: `Analysis failed: ${e.message}` })) };
@@ -210,10 +159,10 @@ ${fmtRules(visualRules)}
 Call the visual_compliance_check tool with your findings.`;
 
     passes.push(
-      callAI(apiKey, "google/gemini-2.5-pro", [
+      callAITool(AI_MODEL_SMART, [
         { role: "system", content: sysPrompt },
         { role: "user", content: [{ type: "text", text: `Check these ${frameCount} frames from a ${videoDuration}s video ad for 18+/GambleAware visibility.` }, ...frames] },
-      ], [complianceTool("visual_compliance_check", "Return visual messaging compliance results")], { type: "function", function: { name: "visual_compliance_check" } })
+      ], [complianceTool("visual_compliance_check", "Return visual messaging compliance results")], "visual_compliance_check")
         .catch((e) => {
           console.error("Pass 2 (visual) failed:", e);
           return { results: visualRules.map((r) => ({ rule_id: r.id, passed: false, reason: `Analysis failed: ${e.message}` })) };
@@ -241,10 +190,10 @@ ${fmtRules(contentRules)}
 Call the content_compliance_check tool with your findings.`;
 
     passes.push(
-      callAI(apiKey, "google/gemini-2.5-flash", [
+      callAITool(AI_MODEL_FAST, [
         { role: "system", content: sysPrompt },
         { role: "user", content: [{ type: "text", text: `Analyse the content and claims in these ${frameCount} frames from a ${videoDuration}s video ad.` }, ...frames] },
-      ], [complianceTool("content_compliance_check", "Return content/claims compliance results")], { type: "function", function: { name: "content_compliance_check" } })
+      ], [complianceTool("content_compliance_check", "Return content/claims compliance results")], "content_compliance_check")
         .catch((e) => {
           console.error("Pass 3 (content) failed:", e);
           return { results: contentRules.map((r) => ({ rule_id: r.id, passed: false, reason: `Analysis failed: ${e.message}` })) };
@@ -263,7 +212,6 @@ Call the content_compliance_check tool with your findings.`;
 // ---- AI name generation ----
 
 async function generateAIName(
-  apiKey: string,
   contentType: string,
   content: any,
   fileUrl: string | null,
@@ -300,7 +248,8 @@ async function generateAIName(
       return "";
     }
 
-    return await callAIText(apiKey, "google/gemini-2.5-flash-lite", messages);
+    const name = await callAIText(AI_MODEL_FAST, messages, { maxTokens: 50 });
+    return name.replace(/^["']|["']$/g, "");
   } catch (e) {
     console.error("AI name generation failed:", e);
     return "";
@@ -381,13 +330,10 @@ serve(async (req) => {
 
     const { content_type, content, rules, file_url, frame_urls, video_duration, thumbnail_path: clientThumbnailPath } = await req.json();
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
-
     let results: any[];
 
     if (content_type === "video" && frame_urls?.length) {
-      results = await analyseVideoMultiPass(LOVABLE_API_KEY, frame_urls, video_duration || frame_urls.length, rules);
+      results = await analyseVideoMultiPass(frame_urls, video_duration || frame_urls.length, rules);
     } else {
       const rulesDescription = rules
         .map((r: any, i: number) => `Rule ${i + 1} (id: ${r.id}): "${r.label}" — ${r.description}`)
@@ -438,12 +384,12 @@ You MUST call the compliance_report tool with your structured findings. Be stric
       }
 
       const isTextOnly = content_type === "email" && !content?.header_image_url;
-      const model = isTextOnly ? "google/gemini-2.5-flash" : "google/gemini-2.5-pro";
+      const model = isTextOnly ? AI_MODEL_FAST : AI_MODEL_SMART;
 
-      const aiResult = await callAI(
-        LOVABLE_API_KEY, model, messages,
+      const aiResult = await callAITool(
+        model, messages,
         [complianceTool("compliance_report", "Return the compliance check results for each rule.")],
-        { type: "function", function: { name: "compliance_report" } }
+        "compliance_report"
       );
       results = aiResult.results || [];
     }
@@ -453,7 +399,7 @@ You MUST call the compliance_report tool with your structured findings. Be stric
     const overallStatus = hasAnyFail ? "fail" : hasAnyWarning ? "warning" : "pass";
 
     // Generate AI name (fire-and-forget style, but we await it)
-    const aiName = await generateAIName(LOVABLE_API_KEY, content_type, content, file_url, frame_urls);
+    const aiName = await generateAIName(content_type, content, file_url, frame_urls);
 
     // Resolve thumbnail path
     let thumbnailPath: string | null = clientThumbnailPath || null;

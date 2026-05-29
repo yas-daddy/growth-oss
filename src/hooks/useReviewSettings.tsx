@@ -151,7 +151,7 @@ export function useAnalyzeReviews() {
   });
 }
 
-const DEFAULT_EMAIL_COPY_PROMPT = `You are an email marketing copywriter for a sports betting brand called StakeMate. Given an email title (subject line), generate the following fields for an email campaign.
+const DEFAULT_EMAIL_COPY_PROMPT = `You are an email marketing copywriter for your brand. Given an email title (subject line), generate the following fields for an email campaign.
 
 IMPORTANT: Where promotional values like bet amounts or free bet amounts are dynamic, you MUST use Liquid template syntax exactly as shown in the examples. Use {{ bet_amount }} and {{ free_bet_amount }} where applicable.
 

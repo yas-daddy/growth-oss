@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { AIError, AI_MODEL_FAST, callAITool } from "../_shared/ai.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -34,13 +35,8 @@ serve(async (req) => {
   }
 
   try {
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-
-    if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY is not configured');
-    }
 
     // Authenticate user or service role (for cron-triggered calls from generate-recommendations)
     const authHeader = req.headers.get('Authorization');
@@ -288,86 +284,54 @@ Focus on:
 3. Any channels that should be paused entirely?
 4. Specific reallocation suggestions (e.g., "shift 20% of Channel A budget to Channel B")`;
 
-    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'google/gemini-3-flash-preview',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt },
-        ],
-        tools: [
-          {
-            type: 'function',
-            function: {
-              name: 'provide_budget_recommendations',
-              description: 'Provide budget allocation recommendations',
-              parameters: {
-                type: 'object',
-                properties: {
-                  recommendations: {
-                    type: 'array',
-                    items: {
-                      type: 'object',
-                      properties: {
-                        entity_type: { type: 'string', enum: ['channel'] },
-                        entity_id: { type: 'string' },
-                        entity_name: { type: 'string' },
-                        channel: { type: 'string' },
-                        action_type: { 
-                          type: 'string', 
-                          enum: ['increase', 'decrease', 'reallocate', 'pause']
-                        },
-                        confidence: { type: 'number' },
-                        reasoning: { type: 'string' },
-                        recommended_action: { type: 'string' },
-                        current_spend: { type: 'number' },
-                        suggested_change: { type: 'number', description: 'Percentage change, e.g., 20 for +20%, -30 for -30%' }
+    const aiArgs = await callAITool(
+      AI_MODEL_FAST,
+      [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt },
+      ],
+      [
+        {
+          type: 'function',
+          function: {
+            name: 'provide_budget_recommendations',
+            description: 'Provide budget allocation recommendations',
+            parameters: {
+              type: 'object',
+              properties: {
+                recommendations: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      entity_type: { type: 'string', enum: ['channel'] },
+                      entity_id: { type: 'string' },
+                      entity_name: { type: 'string' },
+                      channel: { type: 'string' },
+                      action_type: {
+                        type: 'string',
+                        enum: ['increase', 'decrease', 'reallocate', 'pause']
                       },
-                      required: ['entity_type', 'entity_id', 'entity_name', 'channel', 'action_type', 'confidence', 'reasoning', 'recommended_action', 'current_spend', 'suggested_change']
-                    }
+                      confidence: { type: 'number' },
+                      reasoning: { type: 'string' },
+                      recommended_action: { type: 'string' },
+                      current_spend: { type: 'number' },
+                      suggested_change: { type: 'number', description: 'Percentage change, e.g., 20 for +20%, -30 for -30%' }
+                    },
+                    required: ['entity_type', 'entity_id', 'entity_name', 'channel', 'action_type', 'confidence', 'reasoning', 'recommended_action', 'current_spend', 'suggested_change']
                   }
-                },
-                required: ['recommendations']
-              }
+                }
+              },
+              required: ['recommendations']
             }
           }
-        ],
-        tool_choice: { type: 'function', function: { name: 'provide_budget_recommendations' } },
-      }),
-    });
+        }
+      ],
+      'provide_budget_recommendations',
+    );
 
-    if (!aiResponse.ok) {
-      if (aiResponse.status === 429) {
-        return new Response(JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }), {
-          status: 429,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-      if (aiResponse.status === 402) {
-        return new Response(JSON.stringify({ error: 'AI credits depleted. Please add funds to continue.' }), {
-          status: 402,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-      const errorText = await aiResponse.text();
-      console.error('AI API error:', errorText);
-      throw new Error('Failed to get AI recommendations');
-    }
-
-    const aiData = await aiResponse.json();
-    console.log('AI response:', JSON.stringify(aiData, null, 2));
-
-    let recommendations: BudgetRecommendation[] = [];
-    
-    if (aiData.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments) {
-      const args = JSON.parse(aiData.choices[0].message.tool_calls[0].function.arguments);
-      recommendations = args.recommendations || [];
-    }
+    let recommendations: BudgetRecommendation[] = aiArgs.recommendations || [];
+    const rawRecommendationCount = recommendations.length;
 
     // Filter out recommendations for entities that were recently actioned (within 7 days)
     const filteredRecommendations = recommendations.filter(rec => {
@@ -425,19 +389,17 @@ Focus on:
         total_ftds: totalFtds,
         blended_cpa: blendedCpa,
       },
-      skipped_count: (aiData.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments 
-        ? JSON.parse(aiData.choices[0].message.tool_calls[0].function.arguments).recommendations?.length || 0 
-        : 0) - recommendations.length,
+      skipped_count: rawRecommendationCount - recommendations.length,
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
   } catch (error) {
     console.error('Budget analysis error:', error);
-    return new Response(JSON.stringify({ 
-      error: error instanceof Error ? error.message : 'Unknown error' 
+    return new Response(JSON.stringify({
+      error: error instanceof Error ? error.message : 'Unknown error'
     }), {
-      status: 500,
+      status: error instanceof AIError ? error.status : 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
